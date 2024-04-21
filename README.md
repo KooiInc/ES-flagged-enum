@@ -6,8 +6,8 @@ A flagged enum creation module
  * Work In Progress
  * ----------------------------------------------------------------------
  * The module delivers two ways to create an Enum:
- * ENUM(...values)  => writable (can add or remove values), default
- * ENUM$(...values) => readonly
+ * ENUM({name: string, values: Array<string>})  => writable (can add or remove values), default
+ * ENUM$({name: string, values: Array<string>}) => readonly
  *
  * Value retrieval is case insensitive
  *   e.g. myEnum.somevalue, myEnum.SOMEVALUE
@@ -25,5 +25,5 @@ A flagged enum creation module
  * to retrieve an array of current keys in an enum use
  *   myEnum.keys
  * ----------------------------------------------------------------------
- */
+**/
 ```
