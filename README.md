@@ -1,29 +1,14 @@
 # ES-flagged-enum
 A flagged enum creation module
 
-```javascript
-/**
- * Work In Progress
- * ----------------------------------------------------------------------
- * The module delivers two ways to create an Enum:
- * ENUM({name: string, values: Array<string>})  => writable (can add or remove values), default
- * ENUM$({name: string, values: Array<string>}) => readonly
- *
- * Value retrieval is case insensitive
- *   e.g. myEnum.somevalue, myEnum.SOMEVALUE
- * Keys must conform the rules for ES variables
- *
- * To query a value against multiple values
- * one can use either
- *  myEnum.has(value, myEnum.Something|myEnum.somethingelse),
- *  myEnum.is(value, myEnum.Something|myEnum.somethingelse) or
- *  myEnum[`something` + `$is`](myEnum.Something|myEnum.somethingelse)
- *
- * to retrieve the actual (initial) key for a value use
- *  myEnum.keyFor(myEnum.SOMEVALUE)
- *
- * to retrieve an array of current keys in an enum use
- *   myEnum.keys
- * ----------------------------------------------------------------------
-**/
-```
+## Work In Progress
+ 
+The module is programmed in a Class-free Object Oriented way. See:
+* https://rosettacode.org/wiki/Classless-objects
+* https://depth-first.com/articles/2019/03/04/class-free-object-oriented-programming/
+* https://www.youtube.com/watch?v=XFTOG895C7c&t=2603s&ab_channel=FestGroup
+
+The exported `enumFactory` creates a read only flagged Enum from an Array of strings.
+The created Enum is in fact an empty proxified Object, using private (closed over) Objects.
+
+See []
