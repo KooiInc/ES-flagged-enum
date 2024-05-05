@@ -11,4 +11,4 @@ The module is programmed in a Class-free Object Oriented way. See:
 The exported `enumFactory` creates a read only flagged Enum from an Array of strings.
 The created Enum is in fact an empty proxified Object, using private (closed over) Objects.
 
-Fork this little [Stackblitz project](ttps://stackblitz.com/edit/js-gxqsej?file=EnumFactory.js) or see [Demo](https://kooiinc.github.io/ES-flagged-enum/Demo)
+Fork this little [Stackblitz project](https://stackblitz.com/edit/js-gxqsej?file=EnumFactory.js) or see [Demo](https://kooiinc.github.io/ES-flagged-enum/Demo)
