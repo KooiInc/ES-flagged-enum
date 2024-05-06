@@ -1,8 +1,6 @@
 # ES-flagged-enum
-A flagged enum creation module
+A module to create and use flagged enums in vanilla EcmaScript.
 
-## Work In Progress
- 
 The module is programmed in a Class-free Object Oriented way. See:
 * https://rosettacode.org/wiki/Classless-objects
 * https://depth-first.com/articles/2019/03/04/class-free-object-oriented-programming/
