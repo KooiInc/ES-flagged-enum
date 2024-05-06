@@ -9,10 +9,10 @@ initializeAndRunDemo();
 
 function runDemo() {
   let dows = createEnum({keys: localeDowNames(`en-GB`), name: `British weekday names`});
-
+  
   // experiment in the console
   window.dows = dows;
-
+  
   // note: order must follow the Enum order
   const {sun, mon, tue, wed, thu, fri, sat} = `sun,mon,tue,wed,thu,fri,sat`.split(`,`)
     .reduce( (acc, val, i) => ({...acc, [val]: dows[i].flag}), {});
@@ -22,43 +22,41 @@ function runDemo() {
   const weekend = sun|sat;
   
   if (/stackblitz/i.test(location.href)) {
-    print(`!!<p><a target="_top" href="https://stackblitz.com/@KooiInc">Other Stackblitz projects</a></p>`);
+    print(`!!<p><a target="_top" href="https://stackblitz.com/@KooiInc">Other Stackblitz projects</a>
+    | <a target="_blank" href="https://github.com/KooiInc/ES-flagged-enum">@Github</a></p>`);
   }
   
-  if (/github/i.test(location.href)) {
-    print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a></p>`);
-  }
-  
-  print(`!!British weekday names example`,
+  print(
+    `!!British weekday names example`,
     `!!<code class="block">${appText.initialize}</code>`);
-
+  
   print(`<code>\`\${dows}\` <span class="comment">// invokes toString</span></code> =><pre>${dows}</pre>`);
-
+  
   print(`!!Extracting flags to constants`,
     `!!<code class="block">${appText.extractFlags}</code>`);
-
+  
   print(`!!Extracting enum values to constants`,
     `!!<code class="block">${appText.extractValues}</code>`);
-
+  
   print(`!!String, value,  flag`,
     `${appText.strValFlag}
     <code class="block">${appText.sumUp}</code></div>
     => ${dows.thurSDay} (index: ${+dows.ThursDay}, flag: ${dows.$thursday})`);
-
+  
   print(`<div class="instrct">Every Enum value knows a <code>.flag</code>
     property to retrieve its flag value<div>
     <code>dows.wednesday.flag</code> => ${dows.wednesday.flag}`);
-
+  
   print(`
     <div class="instrct">Every Enum value contains a <code>.in</code> method to compare the value
       <br>at hand to a (subset of) flag values(s)<div>
     <code>dows.sunday.in(dows.$SATURDAY|dows.$SUNDAY|dows.friday.flag)</code> => ${
-      dows.sunday.in(dows.$SATURDAY|dows.$SUNDAY|dows.friday.flag)}
+    dows.sunday.in(dows.$SATURDAY|dows.$SUNDAY|dows.friday.flag)}
     <br><code>sunday.in(wed|fri)</code> => ${sunday.in(wed|fri)}
     <br><code>sunday.in(sunday.flag)</code> => ${sunday.in(sunday.flag)}
     <br><code>dows.$sunday === sunday.flag</code> => ${dows.$sunday === sunday.flag}
     <br><code>Boolean(dows.$sunday & (tue|fri))</code> => ${Boolean(dows.$sunday & (tue|fri))}`);
-
+  
   print(`<div class="instrct">To compare a value to a (subset of) flag value(s)
     appending "$in" to a key can also be used<div>
     <code>dows.sunday$in(fri)</code> => ${dows.sunday$in(fri)}
@@ -74,7 +72,7 @@ function runDemo() {
     <div><code class="block">${appText.wdFromDate}</code></div>
     <code>today</code> => ${today}
     <br><code>isWeekend</code> => ${isWeekend}`);
-
+  
   print(
     `!!More roads to Rome for flag(s) comparison`,
     `<code>saturday.in(weekend)</code> => ${saturday.in(weekend)}`,
@@ -95,8 +93,9 @@ function runDemo() {
     `<code>dows["NADA|invalid|what_the_heck"].in(sat|sun)</code> => ${
       dows["NADA|invalid|what_the_heck"].in(sat|sun)}`,
   );
-
+  
   createCodeBlocks();
+  wrap2Container();
 }
 
 function texts() {
@@ -163,33 +162,27 @@ function texts() {
     <br>(so <code>dows.sunday</code> equals <code>dows.Sunday</code>).
     <br>A flag value can be retrieved by starting a key with a $-sign.</div>
     <div class="instrct"><b class="red">To sum up</b>:`
-
+  
   return {initialize, sumUp, wdFromDate, extractFlags, strValFlag, extractValues};
+}
+
+function wrap2Container() {
+  $(`<div class="container">`)
+    .append($(`#log2screen`));
 }
 
 function createCodeBlocks() {
   document.querySelectorAll(`code.block`)
-  .forEach(block => {
-    block = $(block);
-    block.removeClass(`block`);
-    block.addClass(`language-javascript`, `line-numbers`);
-    block.closest(`div`)
-    .append($(`<pre class="line-numbers language-javascript"></pre>`)
-      .append(block));
-  });
-
+    .forEach(block => {
+      block = $(block);
+      block.removeClass(`block`);
+      block.addClass(`language-javascript`, `line-numbers`);
+      block.closest(`div`)
+        .append($(`<pre class="line-numbers language-javascript"></pre>`)
+          .append(block));
+    });
+  
   Prism.highlightAll();
-}
-
-function extendBigInt(bitOrSymbol, inSymbol) {
-  Object.defineProperties(BigInt.prototype, {
-    [bitOrSymbol]: {
-      get() { return that => this | that; }
-    },
-    [inSymbol]: {
-      get() { return that => !!(this & that); }
-    }
-  });
 }
 
 function localeDowNames(locale) {
@@ -204,7 +197,26 @@ function initializeAndRunDemo() {
       font: normal 14px/20px verdana, arial;
       margin: 2rem;
     }`,
-    
+    `.container {
+      position: absolute;
+      inset: 0;
+    }`,
+    `#log2screen {
+      max-width: 50vw;
+      margin: 0 auto;
+      @media (max-width: 1024px) {
+        max-width: 90vw;
+      }
+      @media (min-width: 1024px) and (max-width: 1200px) {
+        max-width: 80vw;
+      }
+      @media (min-width: 1200px) and (max-width: 1600px) {
+        max-width: 60vw;
+      }
+      @media (min-width: 1600px) {
+        max-width: 40vw;
+      }
+    }`,
     `.arrow:before {
       content: '⇨';
       display: inline-block;
@@ -216,13 +228,14 @@ function initializeAndRunDemo() {
     `#log2screen code {
       padding: 0 2px;
     }`,
-   `span.comment { color: grey; }`,
-   `#log2screen div.instrct {color: #555}`,
-   `#log2screen code.language-javascript {
+    `span.comment { color: grey; }`,
+    `#log2screen div.instrct {color: #555}`,
+    `#log2screen code.language-javascript {
       background-color: revert;
       color: revert;
     }`
   );
-
+  
+  $(`head`).append(`<link rel="icon" href="./githubicon.png" type="image/png">`);
   runDemo();
 }
