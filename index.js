@@ -43,6 +43,7 @@ function enumFactory({keys, name = `anonymous`} = {}) {
 function multiFlag(enumArray, key) {
   let combinedFlags = key.split(`|`).reduce((acc, k) =>
     acc |= findValueCI(enumArray, k)?.flag || 0n, 0n);
+  
   return {in: subset => combinedFlags[In](subset)};
 }
 
@@ -75,6 +76,7 @@ function findValueCI(enumArray, key) {
 function serialize(enumArray, name) {
   const header = `Enum values for Enum [${name}]`;
   const separator = Array(header.length + 1).join(`-`);
+  
   return [...[header,separator],
     ...Object.values(enumArray).map(v => {
       return `${v} => index: ${+v}, flag: ${v.flag} (0x${v.flag.toString(2)})`;
@@ -94,12 +96,11 @@ function extendBigInt() {
 
 function EnumValue(value, index) {
   const flag = BigInt(1) << BigInt(index);
-  const val = {
+  
+  return Object.freeze({
     toString() { return value; },
     valueOf()  { return index; },
     flag,
     in(subset) { return valueIn({flag, subset}); }
-  };
-  
-  return Object.freeze(val);
+  });
 }
