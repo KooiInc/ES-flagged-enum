@@ -4,7 +4,6 @@ const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = texts();
 window.factory = createEnum;
-
 initializeAndRunDemo();
 
 function runDemo() {
@@ -151,56 +150,88 @@ function texts() {
     https://tinyurl.com/extPrototypeLink
   */`);
   const cbCode = cleanup(`
-    // create a container (using JQL ($)) and click handler for checkboxes
-    // JQL see https://github.com/KooiInc/JQL
-    let container = $(\`&lt;div id="weekdays">&lt;input type="hidden" id="bitval">&lt;/div>\`)
-      .css({paddingBottom: "3rem"});
-    dows.keys.forEach(key => {
-      let flag = dows[key].flag;
-      container.append($(\`&lt;div>
-        &lt;input type="checkbox" value="\${flag}" id="cb\${flag}"/>
-        &lt;label for="cb\${flag}">\${key}&lt;/label>&lt;/div>\`));
-    });
-    container.append(
-      \`&lt;div>Bit value: &lt;span id="bitvalue">\${toBits(0)} (0x0)&lt;/span>&lt;/div>\`,
-      \`&lt;div>&lt;span id="fromBits">&lt;/span>&lt;/div>\`);
-    container.prepend(\`&lt;div>
-      &lt;input type="checkbox" class="allOrNone" id="allnone"/>
-      &lt;label for="allnone">All&lt;/label>&lt;/div>\`);
+  // create a container (using JQL ($)) and click handler for checkboxes
+  // JQL see https://github.com/KooiInc/JQL
+  let container = $(\`&lt;div id="weekdays">&lt;input type="hidden" id="bitval">&lt;/div>\`)
+    .css({paddingBottom: "3rem"})
+    .append(
+       \`&lt;div>
+        &lt;input type="checkbox" id="all" class="gcb"/>
+        &lt;label for="all" data-gcb="All">&lt;/label>&lt;/div>\`,
+      \`&lt;div>
+        &lt;input type="checkbox" id="midweek" class="gcb"/>
+        &lt;label for="midweek" data-gcb="Work week">&lt;/label>&lt;/div>\`,
+      \`&lt;div>
+        &lt;input type="checkbox" id="weekend" class="gcb"/>
+        &lt;label for="weekend" data-gcb="Weekend">&lt;/label>&lt;/div>\`,
+      \`&lt;hr>\`);
+  dows.keys.forEach(key => {
+    let flag = dows[key].flag;
+    container.append($(\`&lt;div>
+      &lt;input type="checkbox" value="\${flag}" id="cb\${flag}"/>
+      &lt;label for="cb\${flag}">\${key}&lt;/label>&lt;/div>\`));
+  });
+  container.append(
+    \`&lt;hr>\`,
+    \`&lt;div>Bit value: &lt;span id="bitvalue">\${toBits(0)} (0x0)&lt;/span>&lt;/div>\`,
+    \`&lt;div>&lt;span id="fromBits">&lt;/span>&lt;/div>\`);
 
-    let [bitvalInput, bitvalue, fromBits] = [
-      \$(\`#bitval\`), \$(\`#bitvalue\`), $(\`#fromBits\`) ];
+  let [bitvalInput, bitvalue, fromBits] = [
+    \$(\`#bitval\`), \$(\`#bitvalue\`), $(\`#fromBits\`) ];
 
-    $.delegate(\`click\`, \`input[type='checkbox']\`, handle);
+  $.delegate(\`click\`, \`input[type='checkbox']\`, handle);
 
-    // checkboxes click handler
-    function handle(evt) {
-      if (evt.target.classList.contains('allOrNone')) {
-        const isChecked = evt.target.checked;
-        $(\`input[type='checkbox']:not(.allOrNone)\`).each(cb => cb.checked = isChecked);
+  // checkboxes click handler
+  function handle(evt) {
+    if (evt.target.classList.contains(\`gcb\`)) {
+      const what = evt.target.id;
+      const isChecked = evt.target.checked;
+      const allCbs = $(\`input[type='checkbox']\`);
+      const dowCBs = $(\`input[type='checkbox']:not(.gcb)\`);
+      allCbs.each(cb => cb !== evt.target && (cb.checked = false) );
+      
+      switch(what) {
+        case \`midweek\`: dowCBs.each( (cb,i) =>
+          !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) );
+          break;
+        case \`weekend\`: dowCBs.each( (cb,i) =>
+          /sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) );
+          break;
+        default: dowCBs.each(cb => cb.checked = isChecked);
       }
-      
-      let val = toBinary8(\$.nodes(\`.wd:checked\`)
-        .reduce( (a, v) => a + BigInt(v.value), 0n ));
-      
-      bitvalInput.val(val);
-      bitvalue.text(\`\${val} (0x\${parseInt(val, 2).toString(2)})\`);
-      fromBits.text(\`\${valuesFromBits(val, dows).join(\`, \`)}\`);
-    }
-
-    // convert number to byte(s) string
-    function toBinary8(unsignedInt) {
-      const s = unsignedInt.toString(2);
-      
-      return s.padStart(s.length + (8 - s.length%8) % 8, "0");
     }
     
-    // get enum labels from byte string
-    function valuesFromBits(bitValue, Enum) {
-      return [...bitValue]
-        .reverse()
-        .reduce( (a, v, i) => !!(+v) ? [...a, String(Enum[i])] : a, []);
-    }`);
+    let val = toBinary8($.nodes(\`.wd:checked\`)
+      .reduce( (a, v) => a + BigInt(v.value), 0n ));
+    
+    bitvalInput.val(val);
+    bitvalue.text(\`\${val} (0x\${parseInt(val, 2).toString(2)})\`);
+    fromBits.text(\`\${valuesFromBits(val, dows).join(\`, \`)}\`);
+  }
+  
+  // style labels
+  $.editCssRules(
+    \`label[data-gcb]:after {
+      color: green;
+      font-weight: bold;
+      content: attr(data-gcb);
+    }\`,
+    \`label {cursor: pointer}\`
+  );
+
+  // convert number to byte(s) string
+  function toBinary8(unsignedInt) {
+    const bs = unsignedInt.toString(2);
+    
+    return bs.padStart(bs.length + (8 - bs.length%8) % 8, "0");
+  }
+  
+  // get enum labels from byte string
+  function valuesFromBits(bitValue, Enum) {
+    return [...bitValue]
+      .reverse()
+      .reduce( (a, v, i) => !!(+v) ? [...a, String(Enum[i])] : a, []);
+  }`);
   const extractValues = cleanup(`
   /*
     For this example the [dows] Enum values are extracted to consts
@@ -290,7 +321,11 @@ function initializeAndRunDemo() {
     `input[type='checkbox'] {
       vertical-align: bottom;
     }`,
-    `#allNone { color: green; font-weight: bold; }`,
+    `label[data-gcb]:after {
+      color: green;
+      font-weight: bold;
+      content: attr(data-gcb);
+    }`,
     `label {cursor: pointer}`,
   );
   
@@ -299,8 +334,9 @@ function initializeAndRunDemo() {
 }
 
 function toBinary8(unsignedInt) {
-  const s = unsignedInt.toString(2);
-  return s.padStart(s.length + (8 - s.length%8) % 8, "0");
+  const bs = unsignedInt.toString(2);
+  
+  return bs.padStart(bs.length + (8 - bs.length%8) % 8, "0");
 }
 
 function valuesFromBits(bitValue, Enum) {
@@ -309,23 +345,33 @@ function valuesFromBits(bitValue, Enum) {
 
 function checkboxesDemo(dows, code) {
   window.$ = $;
-  let container = $.virtual(`<div id="weekdays"><input type="hidden" id="bitval"></div>`).css({paddingBottom: `3rem`});
+  let container = $.virtual(`<div id="weekdays"><input type="hidden" id="bitval"></div>`)
+    .append(
+      `<div>
+        <input type="checkbox" id="all" class="gcb"/>
+        <label for="all" data-gcb="All"></label></div>`,
+      `<div>
+        <input type="checkbox" id="midweek" class="gcb"/>
+        <label for="midweek" data-gcb="Work week"></label></div>`,
+      `<div>
+        <input type="checkbox" id="weekend" class="gcb"/>
+        <label for="weekend" data-gcb="Weekend"></label></div>`,
+      `<hr>`);
   dows.keys.forEach(key => {
     let flag = dows[key].flag;
-    container.append($(`<div>
-      <input type="checkbox" class="wd" value="${flag}" id="cb${flag}"/>
-        <label for="cb${flag}">${key}</label></div>`));
+    container.append(`
+      <div><input type="checkbox" class="wd" value="${flag}" id="cb${flag}"/>
+        <label for="cb${flag}">${key}</label></div>`);
   });
   container.append(
+    `<hr>`,
     `<div>Bit value: <span id="bitvalue">${toBinary8(0)} (0x0)</span></div>`,
-    `<div><span id="fromBits"></span></div>`);
-  container.prepend(`<div>
-    <input type="checkbox" class="allOrNone" id="allnone"/>
-    <label for="allnone"><b>All</b></label></div>`);
+    `<div><span id="fromBits"></span>&nbsp;</div>`);
   
   print(`!!Create and handle a block of weekday checkboxes`,
-    `!!<code class="block">${code}</code>`);
-  print(container.HTML.get(true));
+    container.HTML.get(true),
+    `!!Code for the above</h3><code class="block">${code}</code>`);
+  
   
   let [bitvalInput, bitvalue, fromBits, an] = [
     $(`#bitval`), $(`#bitvalue`), $(`#fromBits`), $(`#allNone`)];
@@ -333,9 +379,18 @@ function checkboxesDemo(dows, code) {
   $.delegate(`click`, `input[type='checkbox']`, handle);
   
   function handle(evt) {
-    if (evt.target.classList.contains('allOrNone')) {
+    if (evt.target.classList.contains(`gcb`)) {
+      const what = evt.target.id;
       const isChecked = evt.target.checked;
-      $(`input[type='checkbox']:not(.allOrNone)`).each(cb => cb.checked = isChecked)
+      const allCbs = $(`input[type='checkbox']`);
+      const dowCBs = $(`input[type='checkbox']:not(.gcb)`);
+      allCbs.each(cb => cb !== evt.target && (cb.checked = false) );
+      
+      switch(what) {
+        case `midweek`: dowCBs.each( (cb,i) => !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) ); break;
+        case `weekend`: dowCBs.each( (cb,i) => /sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) ); break;
+        default: dowCBs.each(cb => cb.checked = isChecked);
+      }
     }
     
     let val = toBinary8($.nodes(`.wd:checked`)
