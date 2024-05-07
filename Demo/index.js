@@ -123,8 +123,12 @@ function texts() {
   let isWeekend = today.in(sun|sat);`);
   const extractFlags = cleanup(`
   /*
-    the values in [dows] contain flags.
-    Flags are values that can be combined with the bitwise | operator.
+    The values in [dows] contain so called flags.
+    Because flags form a specific (geometric) sequence
+    (a[n] = 1 * 2^(n-1)) they can be combined with the
+    bitwise | operator. When an  enum comprises many values
+    they quickly will be large values, therefore flag values
+    are BigInts.
     A flag for an Enum value can be retrieved by either starting the
     a key with the $-sign ([yourEnum][$key]), or [yourEnum][key].flag
     In this example these [dows] flags are extracted to constants.
