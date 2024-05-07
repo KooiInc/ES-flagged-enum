@@ -170,16 +170,16 @@ function texts() {
       &lt;/div>\`
     ).append(
       \`&lt;div>
-         &lt;input type="checkbox" id="all" class="gcb"/>
-         &lt;label for="all" data-gcb="All">&lt;/label>
+         &lt;input type="checkbox" id="allcb" data-subset="all" class="gcb"/>
+         &lt;label for="allcb" data-gcb="All">&lt;/label>
        &lt;/div>\`,
       \`&lt;div>
-         &lt;input type="checkbox" id="midweek" class="gcb"/>
-         &lt;label for="midweek" data-gcb="Work week">&lt;/label>
+         &lt;input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
+         &lt;label for="midweekcb" data-gcb="Work week">&lt;/label>
        &lt;/div>\`,
       \`&lt;div>
-         &lt;input type="checkbox" id="weekend" class="gcb"/>
-         &lt;label for="weekend" data-gcb="Weekend">&lt;/label>
+         &lt;input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
+         &lt;label for="weekendcb" data-gcb="Weekend">&lt;/label>
        &lt;/div>\`,
       \`&lt;hr>\`);
   dows.keys.forEach(key => {
@@ -200,18 +200,19 @@ function texts() {
 
   // checkboxes click handler
   function handle(evt) {
-    if (evt.target.classList.contains("gcb")) {
+    if (evt.target.dataset.subset) {
       const whatsClicked = evt.target.id;
       const isChecked = evt.target.checked;
-      $("input[type='checkbox']").each(cb =>
-        cb.checked = cb === evt.target ? evt.target.checked : false);
+      $("[data-subset]").each(cb =>
+         cb.checked = cb === evt.target ? evt.target.checked : false);
 
       switch(whatsClicked) {
         case "midweek": dowCheckBoxes.each( (cb,i) =>
-          cb.checked = !/sunday|saturday/i.test(String(dows[i])) );
+            cb.checked = !/sunday|saturday/i.test(String(dows[i])) && isChecked);
           break;
-        case "weekend": dowCheckBoxes.each( (cb,i) =>
-          cb.checked = /sunday|saturday/i.test(String(dows[i])) );
+        case "weekend":
+          dowCheckBoxes.each( (cb,i) =>
+            cb.checked = /sunday|saturday/i.test(String(dows[i])) && isChecked);
           break;
         default: dowCheckBoxes.each(cb => cb.checked = isChecked);
       }
@@ -352,14 +353,14 @@ function checkboxesDemo(dows, code) {
       <input type="hidden" id="blockValue"></div>`)
     .append(
       `<div>
-        <input type="checkbox" id="all" class="gcb"/>
-        <label for="all" data-gcb="All"></label></div>`,
+        <input type="checkbox" id="allcb" data-subset="All" class="gcb"/>
+        <label for="allcb" data-gcb="All"></label></div>`,
       `<div>
-        <input type="checkbox" id="midweek" class="gcb"/>
-        <label for="midweek" data-gcb="Work week"></label></div>`,
+        <input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
+        <label for="midweekcb" data-gcb="Work week"></label></div>`,
       `<div>
-        <input type="checkbox" id="weekend" class="gcb"/>
-        <label for="weekend" data-gcb="Weekend"></label></div>`,
+        <input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
+        <label for="weekendcb" data-gcb="Weekend"></label></div>`,
       `<hr>`);
   dows.keys.forEach(key => {
     let flag = dows[key].flag;
@@ -383,15 +384,15 @@ function checkboxesDemo(dows, code) {
   $.delegate(`click`, `input[type='checkbox']`, handle);
   
   function handle(evt) {
-    if (evt.target.classList.contains(`gcb`)) {
-      const whatsClicked = evt.target.id;
+    if (evt.target.dataset.subset) {
+      const whatsClicked = evt.target.dataset.subset;
       const isChecked = evt.target.checked;
-      $(`input[type='checkbox']`).each(cb =>
-        cb.checked = cb === evt.target ? evt.target.checked : false);
+      $(`[data-subset]`).each(cb =>
+         cb.checked = cb === evt.target ? evt.target.checked : false);
       
       switch(whatsClicked) {
-        case `midweek`: dowCheckBoxes.each( (cb,i) => cb.checked = !/sunday|saturday/i.test(String(dows[i])) ); break;
-        case `weekend`: dowCheckBoxes.each( (cb,i) => cb.checked = /sunday|saturday/i.test(String(dows[i])) ); break;
+        case `midweek`: dowCheckBoxes.each( (cb,i) => cb.checked = !/sunday|saturday/i.test(String(dows[i])) && isChecked); break;
+        case `weekend`: dowCheckBoxes.each( (cb,i) => cb.checked = /sunday|saturday/i.test(String(dows[i])) && isChecked); break;
         default: dowCheckBoxes.each(cb => cb.checked = isChecked);
       }
     }
