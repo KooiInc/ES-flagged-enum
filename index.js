@@ -105,7 +105,7 @@ function toBinary8(unsignedInt) {
 }
 
 function EnumValue(value, index) {
-  const flag = BigInt(1) << BigInt(index);
+  const flag = 1n << BigInt(index);
   
   return Object.freeze({
     toString() { return value; },
