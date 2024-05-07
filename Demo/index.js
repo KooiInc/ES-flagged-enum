@@ -178,7 +178,7 @@ function texts() {
   dows.keys.forEach(key => {
     let flag = dows[key].flag;
     container.append($(\`&lt;div>
-      &lt;input type="checkbox" class="wd" value="\${flag}" id="cb\${flag}"/>
+      &lt;input type="checkbox" data-wd-item="\${key}" value="\${flag}" id="cb\${flag}"/>
       &lt;label for="cb\${flag}">\${key}&lt;/label>&lt;/div>\`));
   });
   container.append(
@@ -211,7 +211,7 @@ function texts() {
       }
     }
     
-    let val = $.nodes(".wd:checked").reduce( (a, v) =>
+    let val = $.nodes("[data-wd-item]:checked").reduce( (a, v) =>
       a + BigInt(v.value), 0n )[bin8];
     
     let selectedDays = valuesFromBits(val, dows).join(\`, \`);
@@ -358,7 +358,7 @@ function checkboxesDemo(dows, code) {
   dows.keys.forEach(key => {
     let flag = dows[key].flag;
     container.append(`
-      <div><input type="checkbox" class="wd" value="${flag}" id="cb${flag}"/>
+      <div><input type="checkbox" data-wd-item="${key}" value="${flag}" id="cb${flag}"/>
         <label for="cb${flag}">${key}</label></div>`);
   });
   container.append(
@@ -392,7 +392,7 @@ function checkboxesDemo(dows, code) {
       }
     }
     
-    let val = $.nodes(`.wd:checked`)
+    let val = $.nodes(`[data-wd-item]:checked`)
       .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
     let selectedDays = valuesFromBits(val, dows).join(`, `);
     bitvalInput.val(val);
