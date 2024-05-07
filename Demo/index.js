@@ -190,21 +190,20 @@ function texts() {
     \`&lt;div>Bit value: &lt;span id="bitvalue">\${0n[bin8]} (0x0)&lt;/span>&lt;/div>\`,
     \`&lt;div>Selected day(s): &lt;span id="fromBits">None&lt;/span>&lt;/div>\`);
 
-  let [bitvalInput, bitvalue, fromBits] = [
-    \$("#bitval"), \$("#bitvalue"), $("#fromBits") ];
+  const [bitvalInput, bitvalue, fromBits, dowCBs] = [
+    $(\`#bitval\`), $(\`#bitvalue\`), $(\`#fromBits\`), $(\`[data-wd-item]\`)];
 
   $.delegate("click", "input[type='checkbox']", handle);
 
   // checkboxes click handler
   function handle(evt) {
     if (evt.target.classList.contains("gcb")) {
-      const what = evt.target.id;
+      const whatsClicked = evt.target.id;
       const isChecked = evt.target.checked;
-      const dowCBs = $("input[type='checkbox']:not(.gcb)");
       $("input[type='checkbox']").each(cb =>
         cb.checked = cb === evt.target ? evt.target.checked : false);
       
-      switch(what) {
+      switch(whatsClicked) {
         case "midweek": dowCBs.each( (cb,i) =>
           !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) );
           break;
@@ -215,9 +214,8 @@ function texts() {
       }
     }
     
-    let val = $.nodes("[data-wd-item]:checked").reduce( (a, v) =>
+    const val = $.nodes("[data-wd-item]:checked").reduce( (a, v) =>
       a + BigInt(v.value), 0n )[bin8];
-    
     let selectedDays = valuesFromBits(val, dows).join(\`, \`);
     bitvalInput.val(val);
     bitvalue.text(\`\${val} (0x\${parseInt(val, 2).toString(2)})\`);
@@ -376,29 +374,27 @@ function checkboxesDemo(dows, code) {
     `!!<p>&nbsp;</p>`);
   
   
-  let [bitvalInput, bitvalue, fromBits] = [
-    $(`#bitval`), $(`#bitvalue`), $(`#fromBits`), $(`#allNone`),];
-  
+  const [bitvalInput, bitvalue, fromBits, dowCBs] = [
+    $(`#bitval`), $(`#bitvalue`), $(`#fromBits`), $(`[data-wd-item]`)];
   $.delegate(`click`, `input[type='checkbox']`, handle);
   
   function handle(evt) {
     if (evt.target.classList.contains(`gcb`)) {
-      const what = evt.target.id;
+      const whatsClicked = evt.target.id;
       const isChecked = evt.target.checked;
       $(`input[type='checkbox']`).each(cb =>
         cb.checked = cb === evt.target ? evt.target.checked : false);
-      let dowCBs = $(`input[type='checkbox']:not(.gcb)`);
       
-      switch(what) {
+      switch(whatsClicked) {
         case `midweek`: dowCBs.each( (cb,i) => !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) ); break;
         case `weekend`: dowCBs.each( (cb,i) => /sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) ); break;
         default: dowCBs.each(cb => cb.checked = isChecked);
       }
     }
     
-    let val = $.nodes(`[data-wd-item]:checked`)
+    const val = $.nodes(`[data-wd-item]:checked`)
       .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
-    let selectedDays = valuesFromBits(val, dows).join(`, `);
+    const selectedDays = valuesFromBits(val, dows).join(`, `);
     bitvalInput.val(val);
     bitvalue.text(`${val} (0x${parseInt(val, 2).toString(2)})`);
     fromBits.text(`${selectedDays.length && selectedDays || `None`}`);
