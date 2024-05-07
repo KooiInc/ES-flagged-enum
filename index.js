@@ -1,6 +1,6 @@
-const In = extendBigInt();
+const [In, bin8] = extendBigInt();
 
-export { enumFactory as default, In };
+export { enumFactory as default, In, bin8 };
 
 function enumFactory({keys, name = `anonymous`} = {}) {
   keys = checkInput(keys, name);
@@ -84,14 +84,23 @@ function serialize(enumArray, name) {
 }
 
 function extendBigInt() {
-  const inSymbol = Symbol(`in`)
+  const inSymbol = Symbol(`in`);
+  const toBinary = Symbol(`bin`)
   Object.defineProperties(BigInt.prototype, {
     [inSymbol]: {
       get() { return that => !!(this & that); }
+    },
+    [toBinary]: {
+      get() { return toBinary8(this); }
     }
   });
   
-  return inSymbol;
+  return [inSymbol, toBinary];
+}
+function toBinary8(unsignedInt) {
+  const bs = unsignedInt.toString(2);
+  
+  return bs.padStart(bs.length + (8 - bs.length % 8) % 8, "0");
 }
 
 function EnumValue(value, index) {
