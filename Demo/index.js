@@ -128,8 +128,8 @@ function texts() {
   const extractFlags = cleanup(`
   /*
     The values in [dows] contain so called flags.
-    Because flags form a specific (geometric) sequence
-    (a[n] = 1 * 2^(n-1)) they can be combined with the
+    Because flags form a specific (geometric) progression
+    (flag[i] = 2**i) flag values can be combined with the
     bitwise | operator. When an  enum comprises many values
     they quickly will be large values, therefore flag values
     are BigInts.
