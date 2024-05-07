@@ -97,10 +97,11 @@ function extendBigInt() {
   
   return [inSymbol, toBinary];
 }
+
 function toBinary8(unsignedInt) {
-  const bs = unsignedInt.toString(2);
+  const int2Str = unsignedInt.toString(2);
   
-  return bs.padStart(bs.length + (8 - bs.length % 8) % 8, "0");
+  return int2Str.padStart(int2Str.length + (8 - int2Str.length % 8) % 8, "0");
 }
 
 function EnumValue(value, index) {
