@@ -101,7 +101,7 @@ function runDemo() {
 function texts() {
   const initialize = cleanup(`
   // import local enum factory function
-  import {default as createEnum, In} from "./EnumFactory.js";
+  import { default as createEnum, In, bin8 } from "./EnumFactory.js";
   //                             ^ see 'Extracting flags to variables'
 
   // function to create Array of weekday names
@@ -145,6 +145,10 @@ function texts() {
     a subset of flags to another subset of flags. So it the case
     of the flag constants here you can for example use
     (fri|mon)[In](weekend)
+    
+    The imported 'bin8' is also a symbolic extension for BigInt.
+    It converts a BigInt to a string of bits (byte sized). It's used
+    in the weekday checkboxes example.
     ---
     * 'Isn't that a bad thing?', you may ask. Well, maybe not:
     https://tinyurl.com/extPrototypeLink
@@ -154,7 +158,7 @@ function texts() {
   // JQL see https://github.com/KooiInc/JQL
   let container = $(\`&lt;div id="weekdays">&lt;input type="hidden" id="bitval">&lt;/div>\`)
     .append(
-       \`&lt;div>
+      \`&lt;div>
          &lt;input type="checkbox" id="all" class="gcb"/>
          &lt;label for="all" data-gcb="All">&lt;/label>
        &lt;/div>\`,
@@ -175,8 +179,8 @@ function texts() {
   });
   container.append(
     \`&lt;hr>\`,
-    \`&lt;div>Bit value: &lt;span id="bitvalue">\${toBits(0)} (0x0)&lt;/span>&lt;/div>\`,
-    \`&lt;div>Selected days &lt;span id="fromBits">None&lt;/span>&lt;/div>\`);
+    \`&lt;div>Bit value: &lt;span id="bitvalue">\${0n[bin8]} (0x0)&lt;/span>&lt;/div>\`,
+    \`&lt;div>Selected day(s): &lt;span id="fromBits">None&lt;/span>&lt;/div>\`);
 
   let [bitvalInput, bitvalue, fromBits] = [
     \$("#bitval"), \$("#bitvalue"), $("#fromBits") ];
@@ -189,7 +193,8 @@ function texts() {
       const what = evt.target.id;
       const isChecked = evt.target.checked;
       const dowCBs = $("input[type='checkbox']:not(.gcb)");
-      $("input[type='checkbox']").each(cb => cb.checked = cb === evt.target );
+      $("input[type='checkbox']").each(cb =>
+        cb.checked = cb === evt.target ? evt.target.checked : false);
       
       switch(what) {
         case "midweek": dowCBs.each( (cb,i) =>
@@ -202,8 +207,8 @@ function texts() {
       }
     }
     
-    let val = toBinary8($.nodes(".wd:checked")
-      .reduce( (a, v) => a + BigInt(v.value), 0n ));
+    let val = $.nodes(".wd:checked").reduce( (a, v) =>
+      a + BigInt(v.value), 0n )[bin8];
     
     let selectedDays = valuesFromBits(val, dows).join(\`, \`);
     bitvalInput.val(val);
@@ -218,17 +223,10 @@ function texts() {
       font-weight: bold;
       content: attr(data-gcb);
     }\`,
-    \`label {cursor: pointer}\`
+    \`label { cursor: pointer; }\`
   );
 
-  // convert number to byte(s) string
-  function toBinary8(unsignedInt) {
-    const bs = unsignedInt.toString(2);
-    
-    return bs.padStart(bs.length + (8 - bs.length % 8) % 8, "0");
-  }
-  
-  // get enum labels from byte string
+  // get enum labels from bit string
   function valuesFromBits(bitValue, Enum) {
     return [...bitValue]
       .reverse()
@@ -362,7 +360,7 @@ function checkboxesDemo(dows, code) {
   container.append(
     `<hr>`,
     `<div>Bit value: <span id="bitvalue">${0n[bin8]} (0x0)</span></div>`,
-    `<div>Selected days: <span id="fromBits">None</span></div>`);
+    `<div>Selected day(s): <span id="fromBits">None</span></div>`);
   
   print(`!!Create and handle a block of weekday checkboxes`,
     container.HTML.get(true),
@@ -379,7 +377,8 @@ function checkboxesDemo(dows, code) {
     if (evt.target.classList.contains(`gcb`)) {
       const what = evt.target.id;
       const isChecked = evt.target.checked;
-      $(`input[type='checkbox']`).each(cb => cb.checked = cb === evt.target );
+      $(`input[type='checkbox']`).each(cb =>
+        cb.checked = cb === evt.target ? evt.target.checked : false);
       let dowCBs = $(`input[type='checkbox']:not(.gcb)`);
       
       switch(what) {
