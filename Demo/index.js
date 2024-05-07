@@ -1,4 +1,4 @@
-import {default as createEnum, In } from "../index.js";
+import {default as createEnum, In, bin8 } from "../index.js";
 import { $, logFactory } from './sbhelpers.js';
 const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
@@ -153,60 +153,62 @@ function texts() {
   // create a container (using JQL ($)) and click handler for checkboxes
   // JQL see https://github.com/KooiInc/JQL
   let container = $(\`&lt;div id="weekdays">&lt;input type="hidden" id="bitval">&lt;/div>\`)
-    .css({paddingBottom: "3rem"})
     .append(
        \`&lt;div>
-        &lt;input type="checkbox" id="all" class="gcb"/>
-        &lt;label for="all" data-gcb="All">&lt;/label>&lt;/div>\`,
+         &lt;input type="checkbox" id="all" class="gcb"/>
+         &lt;label for="all" data-gcb="All">&lt;/label>
+       &lt;/div>\`,
       \`&lt;div>
-        &lt;input type="checkbox" id="midweek" class="gcb"/>
-        &lt;label for="midweek" data-gcb="Work week">&lt;/label>&lt;/div>\`,
+         &lt;input type="checkbox" id="midweek" class="gcb"/>
+         &lt;label for="midweek" data-gcb="Work week">&lt;/label>
+       &lt;/div>\`,
       \`&lt;div>
-        &lt;input type="checkbox" id="weekend" class="gcb"/>
-        &lt;label for="weekend" data-gcb="Weekend">&lt;/label>&lt;/div>\`,
+         &lt;input type="checkbox" id="weekend" class="gcb"/>
+         &lt;label for="weekend" data-gcb="Weekend">&lt;/label>
+       &lt;/div>\`,
       \`&lt;hr>\`);
   dows.keys.forEach(key => {
     let flag = dows[key].flag;
     container.append($(\`&lt;div>
-      &lt;input type="checkbox" value="\${flag}" id="cb\${flag}"/>
+      &lt;input type="checkbox" class="wd" value="\${flag}" id="cb\${flag}"/>
       &lt;label for="cb\${flag}">\${key}&lt;/label>&lt;/div>\`));
   });
   container.append(
     \`&lt;hr>\`,
     \`&lt;div>Bit value: &lt;span id="bitvalue">\${toBits(0)} (0x0)&lt;/span>&lt;/div>\`,
-    \`&lt;div>&lt;span id="fromBits">&lt;/span>&lt;/div>\`);
+    \`&lt;div>Selected days &lt;span id="fromBits">None&lt;/span>&lt;/div>\`);
 
   let [bitvalInput, bitvalue, fromBits] = [
-    \$(\`#bitval\`), \$(\`#bitvalue\`), $(\`#fromBits\`) ];
+    \$("#bitval"), \$("#bitvalue"), $("#fromBits") ];
 
-  $.delegate(\`click\`, \`input[type='checkbox']\`, handle);
+  $.delegate("click", "input[type='checkbox']", handle);
 
   // checkboxes click handler
   function handle(evt) {
-    if (evt.target.classList.contains(\`gcb\`)) {
+    if (evt.target.classList.contains("gcb")) {
       const what = evt.target.id;
       const isChecked = evt.target.checked;
-      const allCbs = $(\`input[type='checkbox']\`);
-      const dowCBs = $(\`input[type='checkbox']:not(.gcb)\`);
-      allCbs.each(cb => cb !== evt.target && (cb.checked = false) );
+      const dowCBs = $("input[type='checkbox']:not(.gcb)");
+      $("input[type='checkbox']").each(cb => cb.checked = cb === evt.target );
       
       switch(what) {
-        case \`midweek\`: dowCBs.each( (cb,i) =>
+        case "midweek": dowCBs.each( (cb,i) =>
           !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) );
           break;
-        case \`weekend\`: dowCBs.each( (cb,i) =>
+        case "weekend": dowCBs.each( (cb,i) =>
           /sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) );
           break;
         default: dowCBs.each(cb => cb.checked = isChecked);
       }
     }
     
-    let val = toBinary8($.nodes(\`.wd:checked\`)
+    let val = toBinary8($.nodes(".wd:checked")
       .reduce( (a, v) => a + BigInt(v.value), 0n ));
     
+    let selectedDays = valuesFromBits(val, dows).join(\`, \`);
     bitvalInput.val(val);
     bitvalue.text(\`\${val} (0x\${parseInt(val, 2).toString(2)})\`);
-    fromBits.text(\`\${valuesFromBits(val, dows).join(\`, \`)}\`);
+    fromBits.text(\`\${selectedDays.length && selectedDays || \`None\`}\`);
   }
   
   // style labels
@@ -223,7 +225,7 @@ function texts() {
   function toBinary8(unsignedInt) {
     const bs = unsignedInt.toString(2);
     
-    return bs.padStart(bs.length + (8 - bs.length%8) % 8, "0");
+    return bs.padStart(bs.length + (8 - bs.length % 8) % 8, "0");
   }
   
   // get enum labels from byte string
@@ -333,12 +335,6 @@ function initializeAndRunDemo() {
   runDemo();
 }
 
-function toBinary8(unsignedInt) {
-  const bs = unsignedInt.toString(2);
-  
-  return bs.padStart(bs.length + (8 - bs.length%8) % 8, "0");
-}
-
 function valuesFromBits(bitValue, Enum) {
   return [...bitValue].reverse().reduce( (a, v, i) => !!(+v) ? [...a, String(Enum[i])] : a, []);
 }
@@ -365,16 +361,17 @@ function checkboxesDemo(dows, code) {
   });
   container.append(
     `<hr>`,
-    `<div>Bit value: <span id="bitvalue">${toBinary8(0)} (0x0)</span></div>`,
-    `<div><span id="fromBits"></span>&nbsp;</div>`);
+    `<div>Bit value: <span id="bitvalue">${0n[bin8]} (0x0)</span></div>`,
+    `<div>Selected days: <span id="fromBits">None</span></div>`);
   
   print(`!!Create and handle a block of weekday checkboxes`,
     container.HTML.get(true),
-    `!!Code for the above</h3><code class="block">${code}</code>`);
+    `!!Code for the above</h3><code class="block">${code}</code>`,
+    `!!<p>&nbsp;</p>`);
   
   
-  let [bitvalInput, bitvalue, fromBits, an] = [
-    $(`#bitval`), $(`#bitvalue`), $(`#fromBits`), $(`#allNone`)];
+  let [bitvalInput, bitvalue, fromBits] = [
+    $(`#bitval`), $(`#bitvalue`), $(`#fromBits`), $(`#allNone`),];
   
   $.delegate(`click`, `input[type='checkbox']`, handle);
   
@@ -382,9 +379,8 @@ function checkboxesDemo(dows, code) {
     if (evt.target.classList.contains(`gcb`)) {
       const what = evt.target.id;
       const isChecked = evt.target.checked;
-      const allCbs = $(`input[type='checkbox']`);
-      const dowCBs = $(`input[type='checkbox']:not(.gcb)`);
-      allCbs.each(cb => cb !== evt.target && (cb.checked = false) );
+      $(`input[type='checkbox']`).each(cb => cb.checked = cb === evt.target );
+      let dowCBs = $(`input[type='checkbox']:not(.gcb)`);
       
       switch(what) {
         case `midweek`: dowCBs.each( (cb,i) => !/sunday|saturday/i.test(String(dows[i])) && (cb.checked = isChecked) ); break;
@@ -393,11 +389,11 @@ function checkboxesDemo(dows, code) {
       }
     }
     
-    let val = toBinary8($.nodes(`.wd:checked`)
-      .reduce( (a, v) => a + BigInt(v.value), 0n ));
-    
+    let val = $.nodes(`.wd:checked`)
+      .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
+    let selectedDays = valuesFromBits(val, dows).join(`, `);
     bitvalInput.val(val);
     bitvalue.text(`${val} (0x${parseInt(val, 2).toString(2)})`);
-    fromBits.text(`${valuesFromBits(val, dows).join(`, `)}`);
+    fromBits.text(`${selectedDays.length && selectedDays || `None`}`);
   }
 }
