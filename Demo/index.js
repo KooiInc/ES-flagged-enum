@@ -1,5 +1,5 @@
 import {default as createEnum, In, bin8 } from "../index.js";
-import { $, logFactory } from './sbhelpers.js';
+import { $, logFactory } from  "./sbhelpers.bundled.js";
 const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = texts();
@@ -161,87 +161,6 @@ function texts() {
     * 'Isn't that a bad thing?', you may ask. Well, maybe not:
     https://tinyurl.com/extPrototypeLink
   */`);
-  const cbCode = cleanup(`
-  // create a container (using JQL ($)) and click handler for checkboxes
-  // JQL see https://github.com/KooiInc/JQL
-  const container = $(
-     \`&lt;div id="weekdays">
-         &lt;input type="hidden" id="blockValue">
-      &lt;/div>\`
-    ).append(
-      \`&lt;div>
-         &lt;input type="checkbox" id="allcb" data-subset="all" class="gcb"/>
-         &lt;label for="allcb" data-gcb="All">&lt;/label>
-       &lt;/div>\`,
-      \`&lt;div>
-         &lt;input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
-         &lt;label for="midweekcb" data-gcb="Work week">&lt;/label>
-       &lt;/div>\`,
-      \`&lt;div>
-         &lt;input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
-         &lt;label for="weekendcb" data-gcb="Weekend">&lt;/label>
-       &lt;/div>\`,
-      \`&lt;hr>\`);
-  dows.keys.forEach(key => {
-    let flag = dows[key].flag;
-    container.append($(\`&lt;div>
-      &lt;input type="checkbox" data-wd-item="\${key}" value="\${flag}" id="cb\${flag}"/>
-      &lt;label for="cb\${flag}">\${key}&lt;/label>&lt;/div>\`));
-  });
-  container.append(
-    \`&lt;hr>\`,
-    \`&lt;div>Bit value: &lt;span id="bitValue">\${0n[bin8]} (0x0)&lt;/span>&lt;/div>\`,
-    \`&lt;div>Selected day(s): &lt;span id="fromBits">None&lt;/span>&lt;/div>\`);
-
-  const [blockValue, bitValue, fromBits, dowCheckBoxes] = [
-    $("#blockValue"), $("#bitValue"), $("#fromBits"), $("[data-wd-item]")];
-
-  $.delegate("click", "input[type='checkbox']", handle);
-
-  // checkboxes click handler
-  function handle(evt) {
-    if (evt.target.dataset.subset) {
-      const whatsClicked = evt.target.id;
-      const isChecked = evt.target.checked;
-      $("[data-subset]").each(cb =>
-         cb.checked = cb === evt.target ? evt.target.checked : false);
-
-      switch(whatsClicked) {
-        case "midweek": dowCheckBoxes.each( (cb,i) =>
-            cb.checked = !/sunday|saturday/i.test(String(dows[i])) && isChecked);
-          break;
-        case "weekend":
-          dowCheckBoxes.each( (cb,i) =>
-            cb.checked = /sunday|saturday/i.test(String(dows[i])) && isChecked);
-          break;
-        default: dowCheckBoxes.each(cb => cb.checked = isChecked);
-      }
-    }
-    
-    const val = $.nodes("[data-wd-item]:checked")
-      .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
-    let selectedDays = valuesFromBits(val, dows).join(\`, \`);
-    blockValue.val(val);
-    bitValue.text(\`\${val} (0x\${parseInt(val, 2).toString(2)})\`);
-    fromBits.text(\`\${selectedDays.length && selectedDays || \`None\`}\`);
-  }
-  
-  // style labels
-  $.editCssRules(
-    \`label[data-gcb]:after {
-      color: green;
-      font-weight: bold;
-      content: attr(data-gcb);
-    }\`,
-    \`label { cursor: pointer; }\`
-  );
-
-  // get enum labels from bit string
-  function valuesFromBits(bitValue, Enum) {
-    return [...bitValue]
-      .reverse()
-      .reduce( (a, v, i) => !!(+v) ? [...a, String(Enum[i])] : a, []);
-  }`);
   const extractValues = cleanup(`
   /*
     For this example the [dows] Enum values are extracted to consts
@@ -256,7 +175,7 @@ function texts() {
     <br>A flag value can be retrieved by starting a key with a $-sign.</div>
     <div class="instrct"><b class="red">To sum up</b>:`
   
-  return {initialize, sumUp, wdFromDate, extractFlags, strValFlag, extractValues, cbCode};
+  return {initialize, sumUp, wdFromDate, extractFlags, strValFlag, extractValues,};
 }
 
 function wrap2Container() {
@@ -328,80 +247,110 @@ function initializeAndRunDemo() {
       background-color: revert;
       color: revert;
     }`,
-    `input[type='checkbox'] {
-      vertical-align: bottom;
-    }`,
-    `label[data-gcb]:after {
-      color: green;
-      font-weight: bold;
-      content: attr(data-gcb);
-    }`,
-    `label {cursor: pointer}`,
   );
   
   $(`head`).append(`<link rel="icon" href="./githubicon.png" type="image/png">`);
   runDemo();
 }
 
-function valuesFromBits(bitValue, Enum) {
-  return [...bitValue].reverse().reduce( (a, v, i) => !!(+v) ? [...a, String(Enum[i])] : a, []);
+function appendCbContainer(containerElem) {
+  print(`!!Create and handle a block of weekday checkboxes`,
+    containerElem.HTML.get(true),
+    `!!Code for the above</h3><code class="block">${
+      checkboxesDemo.toString().replace(/</g, "&lt;")}</code>`,
+    `!!<p>&nbsp;</p>`);
+  return [$("#blockValue"), $("#bitValue"), $("#fromBits"), $("[data-wd-item]")];
 }
 
-function checkboxesDemo(dows, code) {
-  window.$ = $;
-  const container = $.virtual(`<div id="weekdays">
-      <input type="hidden" id="blockValue"></div>`)
-    .append(
-      `<div>
-        <input type="checkbox" id="allcb" data-subset="All" class="gcb"/>
-        <label for="allcb" data-gcb="All"></label></div>`,
-      `<div>
-        <input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
-        <label for="midweekcb" data-gcb="Work week"></label></div>`,
-      `<div>
-        <input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
-        <label for="weekendcb" data-gcb="Weekend"></label></div>`,
-      `<hr>`);
-  dows.keys.forEach(key => {
-    let flag = dows[key].flag;
-    container.append(`
-      <div><input type="checkbox" data-wd-item="${key}" value="${flag}" id="cb${flag}"/>
-        <label for="cb${flag}">${key}</label></div>`);
-  });
-  container.append(
-    `<hr>`,
-    `<div>Bit value: <span id="bitValue">${0n[bin8]} (0x0)</span></div>`,
-    `<div>Selected day(s): <span id="fromBits">None</span></div>`);
+function checkboxesDemo(dows) {
+  styleCbxs();
+  // create a container (using JQL ($)) and click handler for checkboxes
+  // JQL see https://github.com/KooiInc/JQL
+  const checkBoxContainer = $.virtual(`<div id="weekdays">`).append(
+    "<input type='hidden' id='blockValue'>",
+    `<div>
+      <input type="checkbox" id="allcb" data-subset="All" class="gcb"/>
+      <label for="allcb" data-gcb="All"></label></div>`,
+    `<div>
+      <input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
+      <label for="midweekcb" data-gcb="Work week"></label></div>`,
+    `<div>
+      <input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
+      <label for="weekendcb" data-gcb="Weekend"></label></div>`,
+    "<hr>",
+     ...dows.values.map( value =>
+        `<div>
+          <input type="checkbox" data-wd-item="${value}" value="${
+            value.flag}" id="cb${value}"/>
+          <label for="cb${value}">${value}</label>
+        </div>` ),
+   "<hr>",
+   `<div>Bit value: <span id="bitValue">${0n[bin8]} (0x0)</span></div>`,
+   "<div>Selected day(s): <span id='fromBits'>None</span></div>" );
   
-  print(`!!Create and handle a block of weekday checkboxes`,
-    container.HTML.get(true),
-    `!!Code for the above</h3><code class="block">${code}</code>`,
-    `!!<p>&nbsp;</p>`);
+  const [blockValue, bitValue, fromBits, dowCheckBoxes] =
+    appendCbContainer(checkBoxContainer);
+  $.delegate("click", "input[type='checkbox']", handle);
   
-  
-  const [blockValue, bitValue, fromBits, dowCheckBoxes] = [
-    $(`#blockValue`), $(`#bitValue`), $(`#fromBits`), $(`[data-wd-item]`)];
-  $.delegate(`click`, `input[type='checkbox']`, handle);
-  
+  // checkboxes click handler
   function handle(evt) {
-    if (evt.target.dataset.subset) {
-      const whatsClicked = evt.target.dataset.subset;
-      const isChecked = evt.target.checked;
-      $(`[data-subset]`).each(cb =>
-         cb.checked = cb === evt.target ? evt.target.checked : false);
-      
-      switch(whatsClicked) {
-        case `midweek`: dowCheckBoxes.each( (cb,i) => cb.checked = !/sunday|saturday/i.test(String(dows[i])) && isChecked); break;
-        case `weekend`: dowCheckBoxes.each( (cb,i) => cb.checked = /sunday|saturday/i.test(String(dows[i])) && isChecked); break;
-        default: dowCheckBoxes.each(cb => cb.checked = isChecked);
-      }
+    if (evt.target.dataset.subset) { return selectSubset(evt); }
+    return setSelectedValues();
+  }
+
+  // handle subset click
+  function selectSubset(evt) {
+    const isChecked = evt.target.checked;
+    $("[data-subset]").each(cb =>
+      cb.checked = cb === evt.target ? evt.target.checked : false);
+    
+    switch(evt.target.dataset.subset) {
+      case "midweek": dowCheckBoxes.each( (cb,i) =>
+        cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem) && isChecked);
+        break;
+      case "weekend":
+        dowCheckBoxes.each( (cb,i) =>
+          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem) && isChecked);
+        break;
+      default: dowCheckBoxes.each(cb => cb.checked = isChecked);
     }
     
-    const val = $.nodes(`[data-wd-item]:checked`)
+    return setSelectedValues();
+  }
+  
+  // report values after click
+  function setSelectedValues() {
+    const val = $.nodes("[data-wd-item]:checked")
       .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
-    const selectedDays = valuesFromBits(val, dows).join(`, `);
+    const selectedDays = valuesFromBits(val, dows).join(", ");
     blockValue.val(val);
     bitValue.text(`${val} (0x${parseInt(val, 2).toString(2)})`);
     fromBits.text(`${selectedDays.length && selectedDays || `None`}`);
+  }
+  
+  // retrieve weekdays from bit value
+  function valuesFromBits(bitValue, Enum) {
+    return [...bitValue].reverse().reduce( (a, v, i) =>
+      !!(+v) ? [...a, String(Enum[i])] : a, []);
+  }
+  
+  // style checkboxes/labels
+  function styleCbxs() {
+    $.editCssRule(`
+      #weekdays {
+        label {
+          cursor: pointer;
+          &[data-gcb] {
+            &:after {
+              color: green;
+              font-weight: bold;
+              content: attr(data-gcb);
+            }
+          }
+        }
+        input {
+          vertical-align: middle;
+        }
+      }`);
   }
 }
