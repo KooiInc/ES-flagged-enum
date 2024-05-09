@@ -4,6 +4,8 @@ const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = texts();
 window.factory = createEnum;
+
+const isSB = /stackblitz/i.test(location.href);
 initializeAndRunDemo();
 
 function runDemo() {
@@ -20,7 +22,7 @@ function runDemo() {
   const {monday, saturday, wednesday, thursday, tuesday, friday, sunday} = dows;
   const weekend = sun|sat;
   
-  if (/stackblitz/i.test(location.href)) {
+  if (isSB) {
     print(`!!<p><a target="_top" href="https://stackblitz.com/@KooiInc">Other Stackblitz projects</a>
     | <a target="_blank" href="https://github.com/KooiInc/ES-flagged-enum">@Github</a></p>`);
   }
@@ -253,23 +255,11 @@ function initializeAndRunDemo() {
   runDemo();
 }
 
-function appendCbContainer(containerElem) {
-  print(`!!Create and handle a block of weekday checkboxes`,
-    containerElem.HTML.get(true),
-    `!!Code for the above</h3><code class="block">${
-      checkboxesDemo.toString().replace(/</g, "&lt;")}</code>`,
-    `!!<p>&nbsp;</p>`);
-  return [$("#blockValue"), $("#bitValue"), $("#fromBits"), $("[data-wd-item]")];
-}
-
-function checkboxesDemo(dows) {
-  styleCbxs();
-  // create a container (using JQL ($)) and click handler for checkboxes
-  // JQL see https://github.com/KooiInc/JQL
-  const checkBoxContainer = $.virtual(`<div id="weekdays">`).append(
+function createCheckboxesHTML() {
+  return $.virtual(`<div id="weekdays">`).append(
     "<input type='hidden' id='blockValue'>",
     `<div>
-      <input type="checkbox" id="allcb" data-subset="All" class="gcb"/>
+      <input type="checkbox" id="allcb" data-subset="all" class="gcb"/>
       <label for="allcb" data-gcb="All"></label></div>`,
     `<div>
       <input type="checkbox" id="midweekcb" data-subset="midweek" class="gcb"/>
@@ -278,18 +268,56 @@ function checkboxesDemo(dows) {
       <input type="checkbox" id="weekendcb" data-subset="weekend" class="gcb"/>
       <label for="weekendcb" data-gcb="Weekend"></label></div>`,
     "<hr>",
-     ...dows.values.map( value =>
-        `<div>
+    ...dows.values.map( value =>
+      `<div>
           <input type="checkbox" data-wd-item="${value}" value="${
-            value.flag}" id="cb${value}"/>
+        value.flag}" id="cb${value}"/>
           <label for="cb${value}">${value}</label>
         </div>` ),
-   "<hr>",
-   `<div>Bit value: <span id="bitValue">${0n[bin8]} (0x0)</span></div>`,
-   "<div>Selected day(s): <span id='fromBits'>None</span></div>" );
-  
+    "<hr>",
+    `<div>Bit value: <span id="bitValue">${0n[bin8]} (0x0)</span></div>`,
+    "<div>Selected day(s): <span id='fromBits'>None</span></div>" );
+}
+
+function styleCheckboxes() {
+  $.editCssRule(`
+    #weekdays {
+      label {
+        cursor: pointer;
+        &[data-gcb] {
+          &:after {
+            color: green;
+            font-weight: bold;
+            content: attr(data-gcb);
+          }
+        }
+      }
+      input {
+        vertical-align: middle;
+      }
+    }`);
+}
+
+function appendCbContainer(containerElem) {
+  let cbCode = checkboxesDemo.toString().replace(/</g, "&lt;");
+  const removeSpacesRE = RegExp(`\n {${isSB ? 4 : 2}}`, `g`);
+  cbCode = cbCode.slice(cbCode.indexOf(`{`) + 1, -1).trim().replace(removeSpacesRE, `\n`);
+  print(`!!Create and handle a block of weekday checkboxes`,
+    containerElem.HTML.get(true),
+    `!!Relevant code for the above
+        </h3><code class="block">${cbCode}</code>`,
+    `!!<p><!--space-->&nbsp;</p>`);
+  styleCheckboxes();
+  const root = $(`#weekdays`);
+  return [$("#blockValue", root), $("#bitValue", root),
+      $("#fromBits", root), $("[data-wd-item]", root)];
+}
+
+function checkboxesDemo(dows) {
+  // The html is created/appended and handled using JQL ($)
+  // see https://github.com/KooiInc/JQL
   const [blockValue, bitValue, fromBits, dowCheckBoxes] =
-    appendCbContainer(checkBoxContainer);
+    appendCbContainer(createCheckboxesHTML());
   $.delegate("click", "input[type='checkbox']", handle);
   
   // checkboxes click handler
@@ -300,19 +328,23 @@ function checkboxesDemo(dows) {
 
   // handle subset click
   function selectSubset(evt) {
-    const isChecked = evt.target.checked;
     $("[data-subset]").each(cb =>
       cb.checked = cb === evt.target ? evt.target.checked : false);
     
+    if (!evt.target.checked) {
+      dowCheckBoxes.each(cb => cb.checked = false);
+      return setSelectedValues();
+    }
+    
     switch(evt.target.dataset.subset) {
       case "midweek": dowCheckBoxes.each( (cb,i) =>
-        cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem) && isChecked);
+          cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem) && true);
         break;
       case "weekend":
         dowCheckBoxes.each( (cb,i) =>
-          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem) && isChecked);
+          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem) && true);
         break;
-      default: dowCheckBoxes.each(cb => cb.checked = isChecked);
+      default: dowCheckBoxes.each(cb => cb.checked = true);
     }
     
     return setSelectedValues();
@@ -328,29 +360,9 @@ function checkboxesDemo(dows) {
     fromBits.text(`${selectedDays.length && selectedDays || `None`}`);
   }
   
-  // retrieve weekdays from bit value
+  // retrieve weekdays (names) from bit value
   function valuesFromBits(bitValue, Enum) {
     return [...bitValue].reverse().reduce( (a, v, i) =>
       !!(+v) ? [...a, String(Enum[i])] : a, []);
-  }
-  
-  // style checkboxes/labels
-  function styleCbxs() {
-    $.editCssRule(`
-      #weekdays {
-        label {
-          cursor: pointer;
-          &[data-gcb] {
-            &:after {
-              color: green;
-              font-weight: bold;
-              content: attr(data-gcb);
-            }
-          }
-        }
-        input {
-          vertical-align: middle;
-        }
-      }`);
   }
 }
