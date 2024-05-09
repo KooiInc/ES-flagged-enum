@@ -28,11 +28,9 @@ function runDemo() {
   }
   
   if (/github/i.test(location.href)) {
-    print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a></p>`);
+    print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a> |
+      <a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>`);
   }
-  
-  print(`!!
-    <p><a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>`);
   
   print(
     `!!British weekday names example`,
