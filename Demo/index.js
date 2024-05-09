@@ -31,6 +31,9 @@ function runDemo() {
     print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a></p>`);
   }
   
+  print(`!!
+    <p><a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>`);
+  
   print(
     `!!British weekday names example`,
     `!!<code class="block">${appText.initialize}</code>`);
