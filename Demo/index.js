@@ -111,17 +111,17 @@ function texts() {
   import { default as createEnum, In, bin8 } from "./EnumFactory.js";
   //                             ^ see 'Extracting flags to variables'
 
+  // create an enum for british weekday names
+  const dows = createEnum( {
+    keys: localeDowNames("en-GB"),
+    name: "British weekday names"} );
+    
   // function to create Array of weekday names
   function localeDowNames(locale) {
     return [...Array(7)].map((_, i) =>
       Intl.DateTimeFormat(locale, { weekday: 'long' })
         .format(new Date(2006, 0, i + 1)));
-  }
-
-  // create an enum for british weekday names
-  const dows = createEnum( {
-    keys: localeDowNames("en-GB"),
-    name: "British weekday names"} );`);
+  }`);
   const sumUp = cleanup(`
   \`\${dows.thurSDay} (index: \${+dows.Thursday}, flag: \${dows.$thursday}\`
   //  ^ stringify              ^ index                  ^ flag`);
