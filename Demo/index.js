@@ -109,7 +109,7 @@ function texts() {
   const initialize = cleanup(`
   // import local enum factory function
   import { default as createEnum, In, bin8 } from "./EnumFactory.js";
-  //                             ^ see 'Extracting flags to variables'
+  //                             ^ see 'Extracting flags to constants'
 
   // create an enum for british weekday names
   const dows = createEnum( {
