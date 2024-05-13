@@ -33,7 +33,11 @@ function runDemo() {
   }
   
   print(
-    `!!British weekday names example`,
+    `!!British weekday names example
+      <div class="instrct">This module enables the creation of a flagged enumeration (<code>Enum</code>)
+      from an array of strings. Best way to learn about it is by example.
+      In the following an example for an <code>Enum</code> of weekdays is worked
+      out, with code examples and more explanation in comment within the code blocks.</div>`,
     `!!<code class="block">${appText.initialize}</code>`);
   
   print(`<code>\`\${dows}\` <span class="comment">// invokes toString</span></code> =><pre>${dows}</pre>`);
@@ -217,6 +221,9 @@ function initializeAndRunDemo() {
       padding-bottom: 2rem;
       inset: 0;
     }`,
+    `#log2screen .head div.regular {
+      font-weight: normal;
+    }`,
     `#log2screen {
       max-width: 50vw;
       margin: 0 auto;
@@ -245,7 +252,10 @@ function initializeAndRunDemo() {
       padding: 0 2px;
     }`,
     `span.comment { color: grey; }`,
-    `#log2screen div.instrct {color: #555}`,
+    `#log2screen div.instrct {
+      color: #555;
+      font-weight: normal;
+    }`,
     `#log2screen code.language-javascript {
       background-color: revert;
       color: revert;
