@@ -165,8 +165,11 @@ function texts() {
     It converts a BigInt to a string of bits (byte sized). It's used
     in the weekday checkboxes example.
     ---
-    * 'Isn't that a bad thing?', you may ask. Well, maybe not:
-    https://tinyurl.com/extPrototypeLink
+    * 'Isn't that a bad thing?', you may ask. Well, we prefer not to
+       use 'good' or 'bad' in programming. There are just more or less
+       effective/efficient patterns. Extending a native prototype using
+       Symbol may be fine, it's a choice: see
+       https://tinyurl.com/extPrototypeLink
   */`);
   const extractValues = cleanup(`
   /*
