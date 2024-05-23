@@ -41,28 +41,32 @@ function enumFactory({keys, name = `anonymous`} = {}) {
 }
 
 function multiFlag(enumArray, key) {
-  let combinedFlags = key.split(`|`).reduce((acc, k) =>
+  const combinedFlags = key.split(`|`).reduce((acc, k) =>
     acc |= findValueCI(enumArray, k)?.flag || 0n, 0n);
   
-  return {in: subset => combinedFlags[In](subset)};
+  return { in: subset => InSubset(combinedFlags, subset) };
 }
 
 function checkInput(keys, name) {
-  if (!(keys?.constructor === Array) && keys.length > 0) {
+  if (keys?.constructor !== Array) {
     throw new TypeError(`enumFactory [${name}]: please provide keys (an Array of strings)`);
   }
   
-  if (keys.find(k => !(k.constructor === String && k.length > 0))) {
-    throw new TypeError(`The keys for enumFactory [${name}] must all be string`);
+  if (keys.find(k => k?.constructor !== String || String(k).trim().length < 1)) {
+    throw new TypeError(`The keys for enumFactory [${name}] must all be a non empty string`);
   }
   
   return keys;
 }
 
+function InSubset(value, subset) {
+  return !!(value & subset);
+}
+
 function valueIn({enumArray, flag, key, subset} = {}) {
   const flag4Key = enumArray ? findValueCI(enumArray, key)?.flag : flag;
   
-  return flag4Key?.constructor !== BigInt ? false : flag4Key === subset || !!(flag4Key & subset);
+  return flag4Key?.constructor !== BigInt ? false : flag4Key === subset || InSubset(flag4Key, subset);
 }
 
 function escRE(key) {
@@ -85,10 +89,11 @@ function serialize(enumArray, name) {
 
 function extendBigInt() {
   const inSymbol = Symbol(`in`);
-  const toBinary = Symbol(`bin`)
+  const toBinary = Symbol(`bin`);
+  const isIn = (that, me) => !!(me & that);
   Object.defineProperties(BigInt.prototype, {
     [inSymbol]: {
-      get() { return that => !!(this & that); }
+      get() { return that => InSubset(this, that); }
     },
     [toBinary]: {
       get() { return toBinary8(this); }
