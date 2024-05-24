@@ -44,6 +44,9 @@ function enumFactory({keys, name = `anonymous`} = {}) {
 
 function insertValue(forEnum) {
   return function(label, at = 0) {
+    if ( label.constructor !== String || label.length < 1) {
+      throw new TypeError(`[${forEnum.name}].append/prepend/insert: provide a valid label (non empty string)`);
+    }
     const newKeys = Object.keys(forEnum);
     newKeys.splice(at, 0, label);
     return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
@@ -52,6 +55,10 @@ function insertValue(forEnum) {
 
 function renameValue(forEnum ) {
   return function(oldLabel, newLabel) {
+    if ( oldLabel.constructor !== String || oldLabel.length < 1
+      || newLabel.constructor !== String || newLabel.length < 1) {
+      throw new TypeError(`[${forEnum.name}].rename: label to rename and new label must be (non empty) strings`);
+    }
     const newKeys = Object.keys(forEnum).map(k => k === oldLabel ? newLabel : k);
     return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
   }
@@ -59,6 +66,9 @@ function renameValue(forEnum ) {
 
 function removeValue(forEnum ) {
   return function(label) {
+    if ( label.constructor !== String || label.length < 1) {
+      throw new TypeError(`[${forEnum.name}].remove: provide a valid label (non empty string)`);
+    }
     const newKeys = Object.keys(forEnum).filter(l => l !== label);
     return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
   }
