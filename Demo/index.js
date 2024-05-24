@@ -1,9 +1,10 @@
-import {default as createEnum, In, bin8 } from "../index.js";
+import {default as createEnum, extendBigInt } from "../index.js";
 import { $, logFactory } from  "./sbhelpers.bundled.js";
 const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = texts();
 window.factory = createEnum;
+const [In, bin8] = extendBigInt();
 
 const isSB = /stackblitz/i.test(location.href);
 initializeAndRunDemo();
@@ -112,8 +113,9 @@ function runDemo() {
 function texts() {
   const initialize = cleanup(`
   // import local enum factory function
-  import { default as createEnum, In, bin8 } from "./EnumFactory.js";
-  //                             ^ see 'Extracting flags to constants'
+  import { default as createEnum, extendBigInt } from "./EnumFactory.js";
+  const [In, bin8] = extendBigInt();
+  //     ^ see 'Extracting flags to constants'
 
   // create an enum for british weekday names
   const dows = createEnum( {
@@ -154,7 +156,7 @@ function texts() {
   const weekend = sat|sun;
   
   /*
-    Now let's talk about this 'In' thing imported earlier.
+    Now let's talk about this 'In' thing assigned earlier.
     Flags are actually BigInts. 'In' is an ES Symbol, and it's
     used to extend the BigInt prototype*. With it you can compare
     a subset of flags to another subset of flags. So it the case
@@ -351,12 +353,14 @@ function checkboxesDemo(dows) {
     }
     
     switch(evt.target.dataset.subset) {
-      case "midweek": dowCheckBoxes.each( cb =>
-        cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem));
+      case "midweek": dowCheckBoxes.each( cb => {
+        return cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem);
+      });
         break;
       case "weekend":
-        dowCheckBoxes.each( cb =>
-          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem));
+        dowCheckBoxes.each( cb => {
+          return cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem);
+        });
         break;
       default: dowCheckBoxes.each(cb => cb.checked = true);
     }
@@ -376,7 +380,8 @@ function checkboxesDemo(dows) {
   
   // retrieve weekdays (names) from bit value
   function valuesFromBits(bitValue, Enum) {
-    return [...bitValue].reverse().reduce( (a, v, i) =>
-      !!(+v) ? [...a, String(Enum[i])] : a, []);
+    return [...bitValue].reverse().reduce( (a, v, i) => {
+      return !!(+v) ? [...a, String(Enum[i])] : a;
+    }, []);
   }
 }
