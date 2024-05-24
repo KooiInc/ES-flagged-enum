@@ -1,20 +1,20 @@
-const [In, bin8] = extendBigInt();
-
-export { enumFactory as default, In, bin8 };
+export { enumFactory as default, extendBigInt, };
 
 function enumFactory({keys, name = `anonymous`} = {}) {
   keys = checkInput(keys, name);
   
-  const mapped = Object.freeze(
-    keys.reduce( (acc, v, i) => ({...acc, [v]: EnumValue(v, i)}),{})
-  );
+  let mapped = Object.freeze(keys.reduce( (acc, v, i) => ({...acc, [v]: EnumValue(v, i)}),{}));
   
-  const internal = Object.freeze({
+  const internals = {
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
+    get name() { return name; },
+    add: addValue(mapped),
+    remove: removeValue(mapped),
+    rename: renameValue(mapped),
     toString() { return serialize(mapped, name); },
     valueOf() { return serialize(mapped, name); },
-  });
+  };
   
   return new Proxy({}, {
     get(_, key) {
@@ -22,22 +22,42 @@ function enumFactory({keys, name = `anonymous`} = {}) {
       
       switch(true) {
         case !isNaN(parseInt(key)):
-          return mapped[internal.keys[key]];
+          return mapped[internals.keys[key]];
         case /\|/.test(key):
           return multiFlag(mapped, key);
         case key.startsWith(`$`):
           return findValueCI(mapped, key.slice(1))?.flag;
         case /\$in$/i.test(key):
           return subset => valueIn({enumArray: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
-        case key in internal:
-          return internal[key];
+        case key in internals:
+          return internals[key];
         default: return findValueCI(mapped, key);
       }
     },
     set() {
-      throw new TypeError(`Enum [${name}] is readonly`);
+      throw new TypeError(`Enum [${name}] values can not be set directly`);
     }
   });
+}
+
+function addValue(forEnum ) {
+  return function(label) {
+    return enumFactory({keys: Object.keys(forEnum).concat(label), readOnly: false, name: forEnum.name});
+  }
+}
+
+function renameValue(forEnum ) {
+  return function(oldLabel, newLabel) {
+    const newKeys = Object.keys(forEnum).filter(l => l !== oldLabel).concat(newLabel);
+    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
+  }
+}
+
+function removeValue(forEnum ) {
+  return function(label) {
+    const newKeys = Object.keys(forEnum).filter(l => l !== label);
+    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
+  }
 }
 
 function multiFlag(enumArray, key) {
