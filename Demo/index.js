@@ -129,6 +129,7 @@ function texts() {
     myEnum = myEnum.prepend(label: string); &lt;= add a value at start of enum
     myEnum = myEnum.insert(label: string, position: Number); &lt;= insert a value at [position]
     myEnum = myEnum.remove(label: string);  &lt;= remove [label] from enum
+    myEnum = myEnum.rename(label: string, newLabel: string);  &lt;= remove [label] to [newLabel]
   */
   
   // create an enum for british weekday names (used in the examples)
