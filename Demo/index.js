@@ -36,7 +36,10 @@ function runDemo() {
   print(
     `!!British weekday names example
       <div class="instrct">This module enables the creation of a flagged enumeration (<code>Enum</code>)
-      from an array of strings. Best way to learn about it is by example.
+      from an array of strings. A created enum is immutable.
+      You can prepend/append/remove/rename keys to it, but should always (re)assign to have the
+      desired enum available.
+      <br>Best way to learn about it is by example.
       In the following an example for an <code>Enum</code> of weekdays is worked
       out, with code examples and more explanation in comment within the code blocks.</div>`,
     `!!<code class="block">${appText.initialize}</code>`);
@@ -116,8 +119,19 @@ function texts() {
   import { default as createEnum, extendBigInt } from "./EnumFactory.js";
   const [In, bin8] = extendBigInt();
   //     ^ see 'Extracting flags to constants'
-
-  // create an enum for british weekday names
+  
+  /*
+    syntax
+    -------
+    let myEnum = createEnum({keys: Array&lt;string&gt;, name: string});
+                                   ^ at least 1
+    myEnum = myEnum.append(label: string); &lt;= add a value at enum end
+    myEnum = myEnum.prepend(label: string); &lt;= add a value at start of enum
+    myEnum = myEnum.insert(label: string, position: Number); &lt;= insert a value at [position]
+    myEnum = myEnum.remove(label: string);  &lt;= remove [label] from enum
+  */
+  
+  // create an enum for british weekday names (used in the examples)
   const dows = createEnum( {
     keys: localeDowNames("en-GB"),
     name: "British weekday names"} );
@@ -128,6 +142,9 @@ function texts() {
       Intl.DateTimeFormat(locale, { weekday: 'long' })
         .format(new Date(2006, 0, i + 1)));
   }`);
+  const syntax = cleanup(`
+  
+  `);
   const sumUp = cleanup(`
   \`\${dows.thurSDay} (index: \${+dows.Thursday}, flag: \${dows.$thursday}\`
   //  ^ stringify              ^ index                  ^ flag`);
