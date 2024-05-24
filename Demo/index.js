@@ -339,7 +339,7 @@ function checkboxesDemo(dows) {
     if (evt.target.dataset.subset) { return selectSubset(evt); }
     return setSelectedValues();
   }
-
+  
   // handle subset click
   function selectSubset(evt) {
     $("[data-subset]").each(cb =>
@@ -351,12 +351,12 @@ function checkboxesDemo(dows) {
     }
     
     switch(evt.target.dataset.subset) {
-      case "midweek": dowCheckBoxes.each( (cb,i) =>
-          cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem) && true);
+      case "midweek": dowCheckBoxes.each( cb =>
+        cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem));
         break;
       case "weekend":
-        dowCheckBoxes.each( (cb,i) =>
-          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem) && true);
+        dowCheckBoxes.each( cb =>
+          cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem));
         break;
       default: dowCheckBoxes.each(cb => cb.checked = true);
     }
