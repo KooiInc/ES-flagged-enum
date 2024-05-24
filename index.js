@@ -9,9 +9,9 @@ function enumFactory({keys, name = `anonymous`} = {}) {
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
     get name() { return name; },
-    append: addValue(mapped),
-    prepend: prependValue(mapped),
-    insert: insertValue(mapped),
+    append: function(label) { return insertValue(mapped)(label, mapped.length); },
+    prepend: function(label) { return insertValue(mapped)(label, 0); },
+    insert: function(label, at) { return insertValue(mapped)(label, at); },
     remove: removeValue(mapped),
     rename: renameValue(mapped),
     toString() { return serialize(mapped, name); },
@@ -42,21 +42,6 @@ function enumFactory({keys, name = `anonymous`} = {}) {
   });
 }
 
-function addValue(forEnum) {
-  return function(label) {
-    const newKeys = prepend ? [label].concat(Object.keys(forEnum)) : Object.keys(forEnum).concat(label)
-    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
-  }
-}
-
-function prependValue(forEnum) {
-  return function(label) {
-    return insertValue(forEnum)(label);
-    const newKeys = [label].concat(Object.keys(forEnum));
-    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
-  }
-}
-
 function insertValue(forEnum) {
   return function(label, at = 0) {
     const newKeys = Object.keys(forEnum);
@@ -67,7 +52,7 @@ function insertValue(forEnum) {
 
 function renameValue(forEnum ) {
   return function(oldLabel, newLabel) {
-    const newKeys = Object.keys(forEnum).filter(l => l !== oldLabel).concat(newLabel);
+    const newKeys = Object.keys(forEnum).map(k => k === oldLabel ? newLabel : k);
     return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
   }
 }
