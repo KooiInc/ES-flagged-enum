@@ -5,16 +5,18 @@ function enumFactory({keys, name = `anonymous`} = {}) {
   
   let mapped = Object.freeze(keys.reduce( (acc, v, i) => ({...acc, [v]: EnumValue(v, i)}),{}));
   
-  const internals = {
+  const internals = Object.freeze({
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
     get name() { return name; },
-    add: addValue(mapped),
+    append: addValue(mapped),
+    prepend: prependValue(mapped),
+    insert: insertValue(mapped),
     remove: removeValue(mapped),
     rename: renameValue(mapped),
     toString() { return serialize(mapped, name); },
     valueOf() { return serialize(mapped, name); },
-  };
+  });
   
   return new Proxy({}, {
     get(_, key) {
@@ -40,9 +42,26 @@ function enumFactory({keys, name = `anonymous`} = {}) {
   });
 }
 
-function addValue(forEnum ) {
+function addValue(forEnum) {
   return function(label) {
-    return enumFactory({keys: Object.keys(forEnum).concat(label), readOnly: false, name: forEnum.name});
+    const newKeys = prepend ? [label].concat(Object.keys(forEnum)) : Object.keys(forEnum).concat(label)
+    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
+  }
+}
+
+function prependValue(forEnum) {
+  return function(label) {
+    return insertValue(forEnum)(label);
+    const newKeys = [label].concat(Object.keys(forEnum));
+    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
+  }
+}
+
+function insertValue(forEnum) {
+  return function(label, at = 0) {
+    const newKeys = Object.keys(forEnum);
+    newKeys.splice(at, 0, label);
+    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
   }
 }
 
