@@ -3,20 +3,20 @@ export { enumFactory as default, extendBigInt, };
 function enumFactory({keys, name = `anonymous`} = {}) {
   keys = checkInput(keys, name);
   
-  let mapped = Object.freeze(keys.reduce( (acc, v, i) => ({...acc, [v]: EnumValue(v, i)}),{}));
+  let mapped = keys.reduce(createMappedValues, {});
   
-  const internals = Object.freeze({
+  const internals = {
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
     get name() { return name; },
-    append: function(label) { return insertValue(mapped)(label, mapped.length); },
-    prepend: function(label) { return insertValue(mapped)(label, 0); },
-    insert: function(label, at) { return insertValue(mapped)(label, at); },
-    remove: removeValue(mapped),
-    rename: renameValue(mapped),
+    append: function(label) { mapped = addValue2Enum(mapped, name, label, Object.keys(mapped).length); },
+    prepend: function(label) { mapped = addValue2Enum(mapped, name, label); },
+    insert: function(label, at) { mapped = addValue2Enum(mapped, name, label, at); },
+    remove: function(label) { mapped = removeValue(mapped, name, label); },
+    rename: function(oldLabel, newLabel) { mapped = renameValue(mapped, name, oldLabel, newLabel); },
     toString() { return serialize(mapped, name); },
     valueOf() { return serialize(mapped, name); },
-  });
+  };
   
   return new Proxy({}, {
     get(_, key) {
@@ -42,36 +42,49 @@ function enumFactory({keys, name = `anonymous`} = {}) {
   });
 }
 
-function insertValue(forEnum) {
-  return function(label, at = 0) {
-    if ( label.constructor !== String || label.length < 1) {
-      throw new TypeError(`[${forEnum.name}].append/prepend/insert: provide a valid label (non empty string)`);
+function addValue2Enum(valueMap, name, label, at = 0) {
+  if ( !isStringWithLength(label)) {
+      console.warn(`[${name}].append/prepend/insert: expected non empty string, received "${label ?? ``}"`);
+      return valueMap;
     }
-    const newKeys = Object.keys(forEnum);
+    
+    label = label.trim();
+    
+    const newKeys = Object.keys(valueMap);
+    
+    if (newKeys.includes(label)) {
+      console.warn(`[${name}].append/prepend/insert "${label}" exists already`);
+      return valueMap;
+    }
+    
     newKeys.splice(at, 0, label);
-    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
-  }
+    
+    return newKeys.reduce(createMappedValues, {});
 }
 
-function renameValue(forEnum ) {
-  return function(oldLabel, newLabel) {
-    if ( oldLabel.constructor !== String || oldLabel.length < 1
-      || newLabel.constructor !== String || newLabel.length < 1) {
-      throw new TypeError(`[${forEnum.name}].rename: label to rename and new label must be (non empty) strings`);
-    }
-    const newKeys = Object.keys(forEnum).map(k => k === oldLabel ? newLabel : k);
-    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
-  }
+function createMappedValues(acc, label, i) {
+  return { ...acc, [label]: EnumValue(label, i) };
 }
 
-function removeValue(forEnum ) {
-  return function(label) {
-    if ( label.constructor !== String || label.length < 1) {
-      throw new TypeError(`[${forEnum.name}].remove: provide a valid label (non empty string)`);
-    }
-    const newKeys = Object.keys(forEnum).filter(l => l !== label);
-    return enumFactory({keys: newKeys, readOnly: false, name: forEnum.name});
+function renameValue(valueMap, enumName, oldLabel, newLabel) {
+  if ( !isStringWithLength(oldLabel) || !isStringWithLength(newLabel)) {
+    console.warn(`[${name}].rename: label to rename and new label must be (non empty) strings`);
+    return valueMap;
   }
+  
+  return Object.keys(valueMap)
+    .map(k => k === oldLabel ? newLabel : k)
+    .reduce(createMappedValues, {});
+}
+
+function removeValue(valueMap, name, label = ``) {
+  return Object.keys(valueMap)
+    .filter(l => l !== label)
+    .reduce(createMappedValues, {});
+}
+
+function isStringWithLength(maybeString) {
+  return maybeString?.constructor === String && maybeString.trim().length;
 }
 
 function multiFlag(enumArray, key) {
@@ -86,7 +99,7 @@ function checkInput(keys, name) {
     throw new TypeError(`enumFactory [${name}]: please provide keys (an Array of strings)`);
   }
   
-  if (keys.find(k => k?.constructor !== String || String(k).trim().length < 1)) {
+  if (keys.find(k => !isStringWithLength(k))) {
     throw new TypeError(`The keys for enumFactory [${name}] must all be a non empty string`);
   }
   
