@@ -36,9 +36,7 @@ function runDemo() {
   print(
     `!!British weekday names example
       <div class="instrct">This module enables the creation of a flagged enumeration (<code>Enum</code>)
-      from an array of strings. A created enum is immutable.
-      You can prepend/append/remove/rename keys to it, but should always (re)assign to have the
-      desired enum available.
+      from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.
       <br>Best way to learn about it is by example.
       In the following an example for an <code>Enum</code> of weekdays is worked
       out, with code examples and more explanation in comment within the code blocks.</div>`,
