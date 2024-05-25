@@ -120,16 +120,16 @@ function texts() {
   const [In, bin8] = extendBigInt();
   //     ^ see 'Extracting flags to constants'
   
-  /*
+  /**
     syntax
     -------
     let myEnum = createEnum({keys: Array&lt;string&gt;, name: string});
                                    ^ at least 1
-    myEnum = myEnum.append(label: string); &lt;= add a value at enum end
-    myEnum = myEnum.prepend(label: string); &lt;= add a value at start of enum
-    myEnum = myEnum.insert(label: string, position: Number); &lt;= insert a value at [position]
-    myEnum = myEnum.remove(label: string);  &lt;= remove [label] from enum
-    myEnum = myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
+    myEnum.append(label: string); &lt;= add a value at enum end
+    myEnum.prepend(label: string); &lt;= add a value at enum start
+    myEnum.insert(label: string, position: Number); &lt;= insert a value at enum[position]
+    myEnum.remove(label: string);  &lt;= remove [label] from enum
+    myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
   */
   
   // create an enum for british weekday names (used in the examples)
@@ -153,7 +153,7 @@ function texts() {
   let today = dows[new Date().getDay()];
   let isWeekend = today.in(sun|sat);`);
   const extractFlags = cleanup(`
-  /*
+  /**
     The values in [dows] contain so called flags.
     Because flags form a specific (geometric) progression
     (flag[i] = 2**i) flag values can be combined with the
@@ -173,7 +173,7 @@ function texts() {
   // create a 'weekend' constant from flags for this example
   const weekend = sat|sun;
   
-  /*
+  /**
     Now let's talk about this 'In' thing assigned earlier.
     Flags are actually BigInts. 'In' is an ES Symbol, and it's
     used to extend the BigInt prototype*. With it you can compare
