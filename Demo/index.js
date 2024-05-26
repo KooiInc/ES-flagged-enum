@@ -119,7 +119,7 @@ function runDemo() {
 function texts() {
   const init = cleanup(`
   // import local enum factory function
-  import { default as createEnum, extendBigInt } from "./EnumFactory.js";
+  import { default as createEnum, extendBigInt } from "[module path]";
   const [In, bin8] = extendBigInt();
   //     ^ see 'Extracting flags to constants'
   
