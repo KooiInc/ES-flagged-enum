@@ -1,10 +1,8 @@
 export { enumFactory as default, extendBigInt, };
 
-function enumFactory({keys, name = `anonymous`} = {}) {
-  keys = checkInput(keys, name);
-  
+function enumFactory({keys = [], name = `anonymous`} = {}) {
+  checkInput(keys, name);
   let mapped = keys.reduce(createMappedValues, {});
-  
   const internals = {
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
@@ -98,8 +96,7 @@ function checkInput(keys, name) {
   if (keys?.constructor !== Array) {
     throw new TypeError(`enumFactory [${name}]: please provide keys (an Array of strings)`);
   }
-  
-  if (keys.find(k => !isStringWithLength(k))) {
+  if (keys.length && keys.find(k => !isStringWithLength(k))) {
     throw new TypeError(`The keys for enumFactory [${name}] must all be a non empty string`);
   }
   
