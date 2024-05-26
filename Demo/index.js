@@ -302,8 +302,7 @@ function createCheckboxesHTML() {
     "<hr>",
     ...dows.values.map( value =>
       `<div>
-          <input type="checkbox" data-wd-item="${value}" value="${
-        value.flag}" id="cb${value}"/>
+          <input type="checkbox" data-dow value="${value.flag}" id="cb${value}"/>
           <label for="cb${value}">${value}</label>
         </div>` ),
     "<hr>",
@@ -342,7 +341,7 @@ function appendCbContainer(containerElem) {
   styleCheckboxes();
   const root = $(`#weekdays`);
   return [$("#blockValue", root), $("#bitValue", root),
-    $("#fromBits", root), $("[data-wd-item]", root)];
+    $("#fromBits", root), $("input[data-dow]", root)];
 }
 
 function checkboxesDemo(dows) {
@@ -370,12 +369,12 @@ function checkboxesDemo(dows) {
     
     switch(evt.target.dataset.subset) {
       case "midweek": dowCheckBoxes.each( cb => {
-        return cb.checked = !/sunday|saturday/i.test(cb.dataset.wdItem);
-      });
+          return cb.checked = !dows["sunday|saturday"].in(BigInt(cb.value));
+        });
         break;
       case "weekend":
         dowCheckBoxes.each( cb => {
-          return cb.checked = /sunday|saturday/i.test(cb.dataset.wdItem);
+          return cb.checked = (dows.sunday.flag|dows.saturday.flag)[In](BigInt(cb.value));
         });
         break;
       default: dowCheckBoxes.each(cb => cb.checked = true);
