@@ -26,7 +26,7 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
         case /\|/.test(key):
           return multiFlag(mapped, key);
         case key.startsWith(`$`):
-          return findValueCI(mapped, key.slice(1))?.flag;
+          return findValueCI(mapped, key.slice(1))?.flag ?? 0n;
         case /\$in$/i.test(key):
           return subset => valueIn({enumArray: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
         case key in internals:
