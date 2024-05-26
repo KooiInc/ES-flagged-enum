@@ -32,15 +32,20 @@ function runDemo() {
     print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a> |
       <a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>`);
   }
-  
+  const seasons = seasonsEnum();
+  const seasonsCode = seasonsEnum.toString();
   print(
-    `!!British weekday names example
-      <div class="instrct">This module enables the creation of a flagged enumeration (<code>Enum</code>)
-      from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.
-      <br>Best way to learn about it is by example.
-      In the following an example for an <code>Enum</code> of weekdays is worked
-      out, with code examples and more explanation in comment within the code blocks.</div>`,
-    `!!<code class="block">${appText.initialize}</code>`);
+    `!!Create a flagged Enumeration
+      <div class="instrct">This module enables the creation of an empty flagged enumeration (<code>Enum</code>)
+      or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.</div>`,
+    `!!<code class="block">${appText.init}
+      ${cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`))}</code>`,
+    `<code>seasons.toString()</code> => <pre>${seasons}</pre>`);
+  
+  print(`!!British weekday names example
+      <div class="instrct">In the following an <code>Enum</code> of weekdays is worked
+      out, with code examples and more explanation in comment within the code blocks.</div>
+      <code class="block">${appText.initializeDOWS}</code>`);
   
   print(`<code>\`\${dows}\` <span class="comment">// invokes toString</span></code> =><pre>${dows}</pre>`);
   
@@ -106,21 +111,13 @@ function runDemo() {
       dows["NADA|invalid|what_the_heck"].in(sat|sun)}`,
   );
   checkboxesDemo(dows, appText.cbCode);
-  const seasons = seasonsEnum();
-  const seasonsCode = seasonsEnum.toString();
-  print(
-    `!!Create enum using insert/append/prepend/remove/rename`,
-    `!!<code class="block">${
-        cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`))}</code>`,
-    `<pre>${seasons}</pre>`,
-    `<p>&nbsp;</p>`);
   createCodeBlocks();
   wrap2Container();
   
 }
 
 function texts() {
-  const initialize = cleanup(`
+  const init = cleanup(`
   // import local enum factory function
   import { default as createEnum, extendBigInt } from "./EnumFactory.js";
   const [In, bin8] = extendBigInt();
@@ -136,8 +133,8 @@ function texts() {
     myEnum.insert(label: string, position: Number); &lt;= insert a value at enum[position]
     myEnum.remove(label: string);  &lt;= remove [label] from enum
     myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
-  */
-  
+  */`)
+  const initializeDOWS = cleanup(`
   // create an enum for british weekday names (used in the examples)
   const dows = createEnum( {
     keys: localeDowNames("en-GB"),
@@ -211,7 +208,7 @@ function texts() {
     <br>A flag value can be retrieved by starting a key with a $-sign.</div>
     <div class="instrct"><b class="red">To sum up</b>:`
   
-  return {initialize, sumUp, wdFromDate, extractFlags, strValFlag, extractValues,};
+  return {init, initializeDOWS, sumUp, wdFromDate, extractFlags, strValFlag, extractValues,};
 }
 
 function wrap2Container() {
@@ -344,7 +341,8 @@ function appendCbContainer(containerElem) {
   print(`!!Create and handle a block of weekday checkboxes`,
     containerElem.HTML.get(true),
     `!!Relevant code for the above
-        </h3><code class="block">${cbCode}</code>`);
+        </h3><code class="block">${cbCode}</code>`,
+    `!!<p>&nbsp;</p>`);
   styleCheckboxes();
   const root = $(`#weekdays`);
   return [$("#blockValue", root), $("#bitValue", root),
@@ -409,7 +407,9 @@ function checkboxesDemo(dows) {
 }
 
 function seasonsEnum() {
+  // create empty Enum named 'Seasons'
   const seasons = createEnum({name: "Seasons"});
+  // adding the values using the instance methods
   seasons.prepend("Sumer");
   seasons.rename("Sumer", "Summer");
   seasons.append("Spring");
