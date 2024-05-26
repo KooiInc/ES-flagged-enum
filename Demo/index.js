@@ -106,6 +106,14 @@ function runDemo() {
       dows["NADA|invalid|what_the_heck"].in(sat|sun)}`,
   );
   checkboxesDemo(dows, appText.cbCode);
+  const seasons = seasonsEnum();
+  const seasonsCode = seasonsEnum.toString();
+  print(
+    `!!Create enum using insert/append/prepend/remove/rename`,
+    `!!<code class="block">${
+        cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`))}</code>`,
+    `<pre>${seasons}</pre>`,
+    `<p>&nbsp;</p>`);
   createCodeBlocks();
   wrap2Container();
   
@@ -121,8 +129,8 @@ function texts() {
   /**
     syntax
     -------
-    let myEnum = createEnum({keys: Array&lt;string&gt;, name: string});
-                                   ^ at least 1
+    let myEnum = createEnum({[keys: Array&lt;string&gt;], [name: string]});
+                                   ^ at least 1 if 'keys' is given
     myEnum.append(label: string); &lt;= add a value at enum end
     myEnum.prepend(label: string); &lt;= add a value at enum start
     myEnum.insert(label: string, position: Number); &lt;= insert a value at enum[position]
@@ -336,8 +344,7 @@ function appendCbContainer(containerElem) {
   print(`!!Create and handle a block of weekday checkboxes`,
     containerElem.HTML.get(true),
     `!!Relevant code for the above
-        </h3><code class="block">${cbCode}</code>`,
-    `!!<p><!--space-->&nbsp;</p>`);
+        </h3><code class="block">${cbCode}</code>`);
   styleCheckboxes();
   const root = $(`#weekdays`);
   return [$("#blockValue", root), $("#bitValue", root),
@@ -399,4 +406,16 @@ function checkboxesDemo(dows) {
       return !!(+v) ? [...a, String(Enum[i])] : a;
     }, []);
   }
+}
+
+function seasonsEnum() {
+  const seasons = createEnum({name: "Seasons"});
+  seasons.prepend("Sumer");
+  seasons.rename("Sumer", "Summer");
+  seasons.append("Spring");
+  seasons.remove("Spring");
+  seasons.prepend("Spring");
+  seasons.append("Winter");
+  seasons.insert("Autumn", 2);
+  return seasons;
 }
