@@ -98,9 +98,12 @@ function checkInput(keys, name) {
   if (keys?.constructor !== Array) {
     throw new TypeError(`enumFactory [${name}]: please provide keys (an Array of strings)`);
   }
+  
   if (keys.length && keys.find(k => !isStringWithLength(k))) {
     throw new TypeError(`The keys for enumFactory [${name}] must all be a non empty string`);
   }
+  
+  keys = keys.filter(k => !/^none$/i.test(k.trim()));
   
   return keys;
 }
