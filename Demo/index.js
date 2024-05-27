@@ -10,6 +10,8 @@ const isSB = /stackblitz/i.test(location.href);
 initializeAndRunDemo();
 
 function runDemo() {
+  if (!isSB) { console.clear(); }
+  
   let dows = createEnum({keys: localeDowNames(`en-GB`), name: `British weekday names`});
   
   // experiment in the console
