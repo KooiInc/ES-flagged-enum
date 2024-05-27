@@ -12,12 +12,14 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
     insert: function(label, at) { mapped = addValue2Enum(mapped, name, label, at); },
     remove: function(label) { mapped = removeValue(mapped, name, label); },
     rename: function(oldLabel, newLabel) { mapped = renameValue(mapped, name, oldLabel, newLabel); },
-    toString() { return serialize(mapped, name); },
-    valueOf() { return serialize(mapped, name); },
+    toString() { return serialize(Object.values(mapped), name); },
+    valueOf() { return serialize(Object.values(mapped), name); },
   };
   
   return new Proxy({}, {
     get(_, key) {
+      if (typeof key === `symbol`) { return; }
+      
       key = String(key).trim();
       
       switch(true) {
@@ -26,12 +28,12 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
         case /\|/.test(key):
           return multiFlag(mapped, key);
         case key.startsWith(`$`):
-          return findValueCI(mapped, key.slice(1))?.flag;
+          return findValueCI(mapped, key.slice(1))?.flag ?? 0n;
         case /\$in$/i.test(key):
           return subset => valueIn({enumValues: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
         case key in internals:
           return internals[key];
-        default: return findValueCI(mapped, key);
+        default: return findValueCI(mapped, key) ?? EnumValue(`None`)
       }
     },
     set() {
@@ -124,11 +126,12 @@ function findValueCI(enumValues, key) {
 function serialize(enumValues, name) {
   const header = `Enum values for Enum [${name}]`;
   const separator = Array(header.length + 1).join(`-`);
-  const aggregated = Object.values(enumValues).map(v => {
-    return `${v.name} => index: ${v.index}, flag: ${v.flag} (0x${v.flag?.toString(2)})`;
-  });
-
-  return [...[header,separator], ...aggregated].join(`\n`);
+  enumValues.unshift(EnumValue(`None`));
+  const aggregated = enumValues.map(v => {
+    return `${v} => index: ${+v}, flag: ${v.flag}n (0x${v.flag?.toString(2)})`;
+  }).join('\n');
+  
+  return [header, separator, aggregated].join(`\n`);
 }
 
 function extendBigInt() {
@@ -153,16 +156,14 @@ function toBinary8(unsignedInt) {
   return int2Str.padStart(int2Str.length + (8 - int2Str.length % 8) % 8, "0");
 }
 
-function EnumValue(name, index) {
-  const isNone = /^none$/i.test(name);
+function EnumValue(entry, index) {
+  const isNone = /^none$/i.test(entry);
   const flag = isNone ? 0n : 1n << BigInt(index);
   
   return Object.freeze({
-    name,
-    index:  index === undefined ? -1 : index,
     flag,
     in(subset) { return valueIn({flag, subset}); },
-    toString() { return name; },
-    valueOf() { return index; }
+    toString() { return entry; },
+    valueOf() { return index !== undefined ? index : -1; }
   });
 }
