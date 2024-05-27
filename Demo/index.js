@@ -42,7 +42,8 @@ function runDemo() {
       or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.</div>`,
     `!!<code class="block">${appText.init}
       ${cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`))}</code>`,
-    `<code>seasons.toString()</code> => <pre>${seasons}</pre>`);
+    `<code>seasons.toString()</code> => <pre>${seasons}</pre>`,
+    `<code>seasons[2]</code> => ${seasons[2]}`);
   
   print(`!!British weekday names example
       <div class="instrct">In the following an <code>Enum</code> of weekdays is worked
