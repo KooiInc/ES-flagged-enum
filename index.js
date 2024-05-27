@@ -3,6 +3,7 @@ export { enumFactory as default, extendBigInt, };
 function enumFactory({keys = [], name = `anonymous`} = {}) {
   checkInput(keys, name);
   let mapped = keys.reduce(createMappedValues, {});
+  
   const internals = {
     get keys() { return Object.keys(mapped); },
     get values() { return Object.values(mapped); },
@@ -12,8 +13,8 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
     insert: function(label, at) { mapped = addValue2Enum(mapped, name, label, at); },
     remove: function(label) { mapped = removeValue(mapped, name, label); },
     rename: function(oldLabel, newLabel) { mapped = renameValue(mapped, name, oldLabel, newLabel); },
-    toString() { return serialize(Object.values(mapped), name); },
-    valueOf() { return serialize(Object.values(mapped), name); },
+    toString() { return serialize(mapped, name); },
+    valueOf() { return serialize(mapped, name); },
   };
   
   return new Proxy({}, {
@@ -129,8 +130,7 @@ function findValueCI(enumValues, key) {
 function serialize(enumValues, name) {
   const header = `Enum values for Enum [${name}]`;
   const separator = Array(header.length + 1).join(`-`);
-  enumValues.unshift(EnumValue(`None`));
-  const aggregated = enumValues.map(v => {
+  const aggregated = Object.values(enumValues).map(v => {
     return `${v} => index: ${+v}, flag: ${v.flag}n (0x${v.flag?.toString(2)})`;
   }).join('\n');
   
