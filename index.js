@@ -26,9 +26,9 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
         case /\|/.test(key):
           return multiFlag(mapped, key);
         case key.startsWith(`$`):
-          return findValueCI(mapped, key.slice(1))?.flag ?? 0n;
+          return findValueCI(mapped, key.slice(1))?.flag;
         case /\$in$/i.test(key):
-          return subset => valueIn({enumArray: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
+          return subset => valueIn({enumValues: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
         case key in internals:
           return internals[key];
         default: return findValueCI(mapped, key);
@@ -107,8 +107,8 @@ function InSubset(value, subset) {
   return !!(value & subset);
 }
 
-function valueIn({enumArray, flag, key, subset} = {}) {
-  const flag4Key = enumArray ? findValueCI(enumArray, key)?.flag : flag;
+function valueIn({enumValues, flag, key, subset} = {}) {
+  const flag4Key = enumValues ? findValueCI(enumValues, key)?.flag : flag;
   
   return flag4Key?.constructor !== BigInt ? false : flag4Key === subset || InSubset(flag4Key, subset);
 }
@@ -117,18 +117,18 @@ function escRE(key) {
   return RegExp(`^${key.trim().replace(/[.*+?^${}()|[/\\]/g, a => `\\${a}`)}$`, 'iu');
 }
 
-function findValueCI(enumArray, key) {
-  return enumArray[Object.keys(enumArray).find((k) => escRE(key).test(k))];
+function findValueCI(enumValues, key) {
+  return enumValues[Object.keys(enumValues).find((k) => escRE(key).test(k))];
 }
 
-function serialize(enumArray, name) {
+function serialize(enumValues, name) {
   const header = `Enum values for Enum [${name}]`;
   const separator = Array(header.length + 1).join(`-`);
-  
-  return [...[header,separator],
-    ...Object.values(enumArray).map(v => {
-      return `${v} => index: ${+v}, flag: ${v.flag} (0x${v.flag.toString(2)})`;
-    })].join(`\n`);
+  const aggregated = Object.values(enumValues).map(v => {
+    return `${v.name} => index: ${v.index}, flag: ${v.flag} (0x${v.flag?.toString(2)})`;
+  });
+
+  return [...[header,separator], ...aggregated].join(`\n`);
 }
 
 function extendBigInt() {
@@ -153,13 +153,16 @@ function toBinary8(unsignedInt) {
   return int2Str.padStart(int2Str.length + (8 - int2Str.length % 8) % 8, "0");
 }
 
-function EnumValue(value, index) {
-  const flag = 1n << BigInt(index);
+function EnumValue(name, index) {
+  const isNone = /^none$/i.test(name);
+  const flag = isNone ? 0n : 1n << BigInt(index);
   
   return Object.freeze({
-    toString() { return value; },
-    valueOf()  { return index; },
+    name,
+    index:  index === undefined ? -1 : index,
     flag,
-    in(subset) { return valueIn({flag, subset}); }
+    in(subset) { return valueIn({flag, subset}); },
+    toString() { return name; },
+    valueOf() { return index; }
   });
 }
