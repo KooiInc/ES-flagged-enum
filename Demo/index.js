@@ -395,7 +395,7 @@ function checkboxesDemo(dows) {
   
   // report values after click
   function setSelectedValues() {
-    const val = $.nodes("[data-wd-item]:checked")
+    const val = $.nodes("[data-dow]:checked")
       .reduce( (a, v) => a + BigInt(v.value), 0n )[bin8];
     const selectedDays = valuesFromBits(val, dows).join(", ");
     blockValue.val(val);
