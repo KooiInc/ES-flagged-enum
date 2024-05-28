@@ -2,11 +2,11 @@ export { enumFactory as default, extendBigInt, };
 
 function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
   keys = checkInput(keys, name);
-  let mapped = keys.reduce(createMappedValues, {});
+  let mapped = keys.reduce(createMappedValues, []);
   
   const internals = {
-    get keys() { return Object.keys(mapped); },
-    get values() { return Object.values(mapped); },
+    get keys() { return mapped.map(v => v.label); },
+    get values() { return mapped.map(v => v.value); },
     get name() { return name; },
     append: function(label) { mapped = addValue2Enum(mapped, name, label, Object.keys(mapped).length); },
     prepend: function(label) { mapped = addValue2Enum(mapped, name, label); },
@@ -25,7 +25,7 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
       
       switch(true) {
         case !isNaN(parseInt(key)):
-          return mapped[internals.keys[key]];
+          return mapped[key].value;
         case /\|/.test(key):
           return multiFlag(mapped, key);
         case key.startsWith(`$`):
@@ -51,20 +51,19 @@ function addValue2Enum(valueMap, name, label, at = 0) {
     
     label = label.trim();
     
-    const newKeys = Object.keys(valueMap);
+    const newKeys = valueMap.map(v => v.label);
     
     if (newKeys.includes(label)) {
       console.warn(`[${name}].append/prepend/insert "${label}" exists already`);
       return valueMap;
     }
     
-    newKeys.splice(at, 0, label);
-    
-    return newKeys.reduce(createMappedValues, {});
+    valueMap.splice(at, 0, {label, value: EnumValue(label, at)});
+    return valueMap;
 }
 
 function createMappedValues(acc, label, i) {
-  return { ...acc, [label]: EnumValue(label, i) };
+  return [...acc, { label, value: EnumValue(label, i) } ];
 }
 
 function renameValue(valueMap, enumName, oldLabel, newLabel) {
@@ -73,15 +72,13 @@ function renameValue(valueMap, enumName, oldLabel, newLabel) {
     return valueMap;
   }
   
-  return Object.keys(valueMap)
-    .map(k => k === oldLabel ? newLabel : k)
-    .reduce(createMappedValues, {});
+  return valueMap
+    .map(entry => entry.label === oldLabel ? {label: newLabel, value: entry.value} : entry);
 }
 
 function removeValue(valueMap, name, label = ``) {
-  return Object.keys(valueMap)
-    .filter(l => l !== label)
-    .reduce(createMappedValues, {});
+  return valueMap
+    .filter(entry => entry.label !== label);
 }
 
 function isStringWithLength(maybeString) {
@@ -130,14 +127,14 @@ function escRE(key) {
 }
 
 function findValueCI(enumValues, key) {
-  return enumValues[Object.keys(enumValues).find((k) => escRE(key).test(k))];
+  return enumValues.find(v => v.label.toLowerCase() === key.toLowerCase())?.value;
 }
 
 function serialize(enumValues, name) {
   const header = `Enum values for Enum [${name}]`;
   const separator = Array(header.length + 1).join(`-`);
-  const aggregated = Object.values(enumValues).map(v => {
-    return `${v} => index: ${+v}, flag: ${v.flag}n (0x${v.flag?.toString(2)})`;
+  const aggregated = enumValues.map(entry => {
+    return `${entry.value} => index: ${+entry.value}, flag: ${entry.value.flag}n (0x${entry.value.flag?.toString(2)})`;
   }).join('\n');
   
   return [header, separator, aggregated].join(`\n`);
