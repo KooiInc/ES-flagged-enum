@@ -129,8 +129,10 @@ function texts() {
   /**
     syntax
     -------
-    let myEnum = createEnum({[keys: Array&lt;string&gt;], [name: string]});
-                                   ^ at least 1 if 'keys' is given
+    let myEnum = createEnum({
+      [keys: String|Array&lt;string&gt;],
+      [name: String] <= default "Anonymous Enum"
+    });
     myEnum.append(label: string); &lt;= add a value at enum end
     myEnum.prepend(label: string); &lt;= add a value at enum start
     myEnum.insert(label: string, position: Number); &lt;= insert a value at enum[position]
