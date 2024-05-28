@@ -11,7 +11,7 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
     append: function(label) { mapped = addValue2Enum(mapped, name, label, Object.keys(mapped).length); },
     prepend: function(label) { mapped = addValue2Enum(mapped, name, label); },
     insert: function(label, at) { mapped = addValue2Enum(mapped, name, label, at); },
-    remove: function(label) { mapped = removeValue(mapped, name, label); },
+    remove: function(label) { mapped = removeValue(mapped, label); },
     rename: function(oldLabel, newLabel) { mapped = renameValue(mapped, name, oldLabel, newLabel); },
     toString() { return serialize(mapped, name); },
     valueOf() { return serialize(mapped, name); },
@@ -43,9 +43,9 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
   });
 }
 
-function addValue2Enum(valueMap, name, label, at = 0) {
+function addValue2Enum(valueMap, enumName, label, at = 0) {
   if ( !isStringWithLength(label)) {
-      console.warn(`[${name}].append/prepend/insert: expected non empty string, received "${label ?? ``}"`);
+      console.warn(`[${enumName}].append/prepend/insert: expected non empty string, received "${label ?? ``}"`);
       return valueMap;
     }
     
@@ -54,7 +54,7 @@ function addValue2Enum(valueMap, name, label, at = 0) {
     const newKeys = valueMap.map(v => v.label);
     
     if (newKeys.includes(label)) {
-      console.warn(`[${name}].append/prepend/insert "${label}" exists already`);
+      console.warn(`[${enumName}].append/prepend/insert "${label}" exists already`);
       return valueMap;
     }
     
@@ -72,7 +72,7 @@ function reIndex(valueMap) {
 
 function renameValue(valueMap, enumName, oldLabel, newLabel) {
   if ( !isStringWithLength(oldLabel) || !isStringWithLength(newLabel)) {
-    console.warn(`[${name}].rename: label to rename and new label must be (non empty) strings`);
+    console.warn(`[${enumName}].rename: label to rename and new label must be (non empty) strings`);
     return valueMap;
   }
   
@@ -82,7 +82,7 @@ function renameValue(valueMap, enumName, oldLabel, newLabel) {
       : entry ));
 }
 
-function removeValue(valueMap, name, label = ``) {
+function removeValue(valueMap, label = ``) {
   return reIndex(valueMap.filter(entry => entry.label !== label));
 }
 
@@ -97,24 +97,26 @@ function multiFlag(enumArray, key) {
   return { in: subset => InSubset(combinedFlags, subset) };
 }
 
+function removeNone(keys) {
+  return keys.filter(k => !/^none$/i.test(k.trim()));
+}
+
 function checkInput(keys, name) {
   if (keys?.constructor === String) {
-    return !/^none$/i.test(k.trim()) ? [keys] : [];
+    keys = [keys];
   }
   
   if (keys?.constructor !== Array) {
-    console.warn(`enumFactory [${name}]: keys should be single String or Array. Inititalized with empty Array`);
-    return [];
+    console.warn(`create enumFactory [${name}]: invalid keys value. Inititalized with empty Array`);
+    keys = [];
   }
   
   if (keys.length && keys.find(k => !isStringWithLength(k))) {
-    console.warn(`enumFactory [${name}]: some key values are not String or empty strings. They will not be used`);
-    return keys.filter(k => isStringWithLength(k));
+    console.warn(`create enumFactory [${name}]: non string/empty string key values are removed`);
+    keys = keys.filter(k => isStringWithLength(k));
   }
   
-  keys = keys.filter(k => !/^none$/i.test(k.trim()));
-  
-  return keys;
+  return removeNone(keys);
 }
 
 function InSubset(value, subset) {
