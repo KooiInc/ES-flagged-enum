@@ -1,7 +1,7 @@
 export { enumFactory as default, extendBigInt, };
 
-function enumFactory({keys = [], name = `anonymous`} = {}) {
-  checkInput(keys, name);
+function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
+  keys = checkInput(keys, name);
   let mapped = keys.reduce(createMappedValues, {});
   
   const internals = {
@@ -34,7 +34,7 @@ function enumFactory({keys = [], name = `anonymous`} = {}) {
           return subset => valueIn({enumValues: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
         case key in internals:
           return internals[key];
-        default: return findValueCI(mapped, key) ?? EnumValue(`None`)
+        default: return findValueCI(mapped, key) ?? EnumValue()
       }
     },
     set() {
@@ -96,12 +96,18 @@ function multiFlag(enumArray, key) {
 }
 
 function checkInput(keys, name) {
+  if (keys?.constructor === String) {
+    return !/^none$/i.test(k.trim()) ? [keys] : [];
+  }
+  
   if (keys?.constructor !== Array) {
-    throw new TypeError(`enumFactory [${name}]: please provide keys (an Array of strings)`);
+    console.warn(`enumFactory [${name}]: keys should be single String or Array. Inititalized with empty Array`);
+    return [];
   }
   
   if (keys.length && keys.find(k => !isStringWithLength(k))) {
-    throw new TypeError(`The keys for enumFactory [${name}] must all be a non empty string`);
+    console.warn(`enumFactory [${name}]: some key values are not String or empty strings. They will not be used`);
+    return keys.filter(k => isStringWithLength(k));
   }
   
   keys = keys.filter(k => !/^none$/i.test(k.trim()));
@@ -160,13 +166,13 @@ function toBinary8(unsignedInt) {
 }
 
 function EnumValue(entry, index) {
-  const isNone = /^none$/i.test(entry);
+  const isNone = !entry || /^none$/i.test(entry);
   const flag = isNone ? 0n : 1n << BigInt(index);
   
   return Object.freeze({
     flag,
     in(subset) { return valueIn({flag, subset}); },
     toString() { return entry; },
-    valueOf() { return index !== undefined ? index : -1; }
+    valueOf() { return isNone ? -1 : index; }
   });
 }
