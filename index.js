@@ -59,11 +59,15 @@ function addValue2Enum(valueMap, name, label, at = 0) {
     }
     
     valueMap.splice(at, 0, {label, value: EnumValue(label, at)});
-    return valueMap;
+    return reIndex(valueMap);
 }
 
 function createMappedValues(acc, label, i) {
   return [...acc, { label, value: EnumValue(label, i) } ];
+}
+
+function reIndex(valueMap) {
+  return valueMap.map(((entry, i) => ({label: entry.label, value: EnumValue(entry.label, i)})));
 }
 
 function renameValue(valueMap, enumName, oldLabel, newLabel) {
@@ -72,13 +76,14 @@ function renameValue(valueMap, enumName, oldLabel, newLabel) {
     return valueMap;
   }
   
-  return valueMap
-    .map(entry => entry.label === oldLabel ? {label: newLabel, value: entry.value} : entry);
+  return reIndex( valueMap
+    .map( (entry, i) => entry.label === oldLabel
+      ? {label: newLabel, value: EnumValue(newLabel, +entry.value)}
+      : entry ));
 }
 
 function removeValue(valueMap, name, label = ``) {
-  return valueMap
-    .filter(entry => entry.label !== label);
+  return reIndex(valueMap.filter(entry => entry.label !== label));
 }
 
 function isStringWithLength(maybeString) {
