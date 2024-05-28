@@ -415,12 +415,12 @@ function seasonsEnum() {
   // create empty Enum named 'Seasons'
   const seasons = createEnum({name: "Seasons"});
   // adding the values using the instance methods
-  seasons.prepend("Sumer");
-  seasons.rename("Sumer", "Summer");
+  seasons.append("Sumer");
   seasons.append("Spring");
+  seasons.append("Winter");
   seasons.remove("Spring");
   seasons.prepend("Spring");
-  seasons.append("Winter");
   seasons.insert("Autumn", 2);
+  seasons.rename("Sumer", "Summer");
   return seasons;
 }
