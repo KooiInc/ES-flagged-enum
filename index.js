@@ -8,6 +8,8 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
  * Creates the flagged Enum using an Array of values
  * and an 'internal' Object containing the actual methods
  * to edit the Enum.
+ * returns an Object proxied with a get trap doing the
+ * actual work
  */
 function createEnumProxy(mapped, internals) {
   return new Proxy({}, {
@@ -42,12 +44,12 @@ function createEnumProxy(mapped, internals) {
  * and uses these values in an Object for 'internal use'
  * within the final Proxy
  * returns an Array containing an Array of mapped
- * values ([mapped]) and the Object for internal use[internals]
+ * values ([mapped]) and the Object for internal use ([internals])
  */
 function createMappedAndInternals(keys, name) {
   let mapped = keys.reduce(createMappedValues, []);
   
-  const internals = {
+  const internals = Object.freeze({
     get keys() { return mapped.map(v => v.label); },
     get values() { return mapped.map(v => v.value); },
     get name() { return name; },
@@ -58,7 +60,7 @@ function createMappedAndInternals(keys, name) {
     rename: function(oldLabel, newLabel) { mapped = renameValue(mapped, name, oldLabel, newLabel); },
     toString() { return serialize(mapped, name); },
     valueOf() { return serialize(mapped, name); },
-  };
+  });
   
   return [ mapped, internals ];
 }
