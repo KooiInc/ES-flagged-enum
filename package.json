@@ -1,6 +1,6 @@
 {
   "name": "es-flagged-enum",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a small factory to create ECMAScript flagged enums",
   "main": "index.js",
   "scripts": {
