@@ -10,3 +10,5 @@ The exported `enumFactory` creates either an empty flagged Enum or a flagged Enu
 The created Enum is in fact an empty proxified Object, using private (closed over) Objects.
 
 Fork this little [Stackblitz project](https://stackblitz.com/edit/js-gxqsej?file=EnumFactory.js) or see [Demo](https://kooiinc.github.io/ES-flagged-enum/Demo)
+
+Also available as [npm package](https://www.npmjs.com/package/es-flagged-enum).
