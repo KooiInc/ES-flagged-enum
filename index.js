@@ -1,7 +1,7 @@
 export { enumFactory as default, extendBigInt, };
 
 function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
-  return createEnumProxy( ...createMappedAndInternals( checkInput(keys, name), name ) );
+  return createEnumProxy( checkInput(keys, name), name );
 }
 
 /**
@@ -11,7 +11,22 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
  * returns an Object proxied with a get trap doing the
  * actual work
  */
-function createEnumProxy(mapped, internals) {
+function createEnumProxy(/*mapped, internals*/keys,  name) {
+  let valueMap = keys.reduce(createMappedValues, []);
+  
+  const internals = Object.freeze({
+    get keys() { return valueMap.map(v => v.label); },
+    get values() { return valueMap.map(v => v.value); },
+    get name() { return name; },
+    append(label) { valueMap = addValue2Enum(valueMap, name, label, Object.keys(valueMap).length); },
+    prepend(label) { valueMap = addValue2Enum(valueMap, name, label); },
+    insert(label, at) { valueMap = addValue2Enum(valueMap, name, label, at); },
+    remove(label) { valueMap = removeValue(valueMap, label); },
+    rename(oldLabel, newLabel) { valueMap = renameValue(valueMap, name, oldLabel, newLabel); },
+    toString() { return serialize(valueMap, name); },
+    valueOf() { return serialize(valueMap, name); },
+  });
+  
   return new Proxy({}, {
     get(_, key) {
       if (typeof key === `symbol`) { return; }
@@ -20,16 +35,16 @@ function createEnumProxy(mapped, internals) {
       
       switch(true) {
         case !isNaN(parseInt(key)):
-          return mapped[key]?.value;
+          return valueMap[key]?.value;
         case /\|/.test(key):
-          return multiFlag(mapped, key);
+          return multiFlag(valueMap, key);
         case key.startsWith(`$`):
-          return findValueCI(mapped, key.slice(1))?.flag ?? 0n;
+          return findValueCI(valueMap, key.slice(1))?.flag ?? 0n;
         case /\$in$/i.test(key):
-          return subset => valueIn({enumValues: mapped, key: key.slice(0, key.indexOf(`$`)), subset});
+          return subset => valueIn({enumValues: valueMap, key: key.slice(0, key.indexOf(`$`)), subset});
         case key in internals:
           return internals[key];
-        default: return findValueCI(mapped, key) ?? EnumValue()
+        default: return findValueCI(valueMap, key) ?? EnumValue()
       }
     },
     set() {
@@ -39,55 +54,28 @@ function createEnumProxy(mapped, internals) {
 }
 
 /**
- * For the flagged Enum with [name] maps the given
- * [keys] (if any) to an array of values
- * and uses these values in an Object for 'internal use'
- * within the final Proxy
- * returns an Array containing an Array of mapped
- * values ([mapped]) and the Object for internal use ([internals])
- */
-function createMappedAndInternals(keys, name) {
-  let mapped = keys.reduce(createMappedValues, []);
-  
-  const internals = Object.freeze({
-    get keys() { return mapped.map(v => v.label); },
-    get values() { return mapped.map(v => v.value); },
-    get name() { return name; },
-    append: function(label) { addValue2Enum(mapped, name, label, Object.keys(mapped).length); },
-    prepend: function(label) { addValue2Enum(mapped, name, label); },
-    insert: function(label, at) { addValue2Enum(mapped, name, label, at); },
-    remove: function(label) { removeValue(mapped, label); },
-    rename: function(oldLabel, newLabel) { renameValue(mapped, name, oldLabel, newLabel); },
-    toString() { return serialize(mapped, name); },
-    valueOf() { return serialize(mapped, name); },
-  });
-  
-  return [ mapped, internals ];
-}
-
-/**
  * Adds a value with [label] for flagged Enum with [name],
  * using the mapped values [valueMap], optionally at
  * position [at] within the [valueMap].
  * returns a re-indexed array of Enum values
  */
-function addValue2Enum(valueMap, enumName, label, at = 0) {
+function addValue2Enum(valueMap, enumName, label, at = 1) {
   if ( !isStringWithLength(label)) {
-      console.warn(`[${enumName}].append/prepend/insert: expected non empty string, received "${label ?? ``}"`);
-      return valueMap;
-    }
-    
-    label = label.trim();
-    
-    const newKeys = valueMap.map(v => v.label);
-    
-    if (newKeys.includes(label)) {
-      console.warn(`[${enumName}].append/prepend/insert "${label}" exists already`);
-      return valueMap;
-    }
-    
-    valueMap.splice(at, 0, {label, value: EnumValue(label, at)});
-    return reIndex(valueMap);
+    console.warn(`[${enumName}].append/prepend/insert: expected non empty string, received "${label ?? ``}"`);
+    return valueMap;
+  }
+  
+  label = label.trim();
+  
+  const newKeys = valueMap.map(v => v.label);
+  
+  if (newKeys.includes(label)) {
+    console.warn(`[${enumName}].append/prepend/insert "${label}" exists already`);
+    return valueMap;
+  }
+  at -= at < 1 ? 0 : 1;
+  valueMap.splice(at, 0, {label, value: EnumValue(label, at)});
+  return reIndex(valueMap);
 }
 
 /**
