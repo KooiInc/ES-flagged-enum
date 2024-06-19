@@ -31,7 +31,7 @@ function createEnumProxy(keys, enumName) {
     get keys() { return valueMap.map(v => v.label); },
     get values() { return valueMap.map(v => v.value); },
     get name() { return enumName; },
-    append(label) { valueMap = addValue2Enum(valueMap, enumName, label, Object.keys(valueMap).length); },
+    append(label) { valueMap = addValue2Enum(valueMap, enumName, label, valueMap.length + 1); },
     prepend(label) { valueMap = addValue2Enum(valueMap, enumName, label); },
     insert(label, at) { valueMap = addValue2Enum(valueMap, enumName, label, at); },
     remove(label) { valueMap = removeValue(valueMap, label); },
