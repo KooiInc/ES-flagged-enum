@@ -32,8 +32,7 @@ function runDemo() {
   
   if (/github/i.test(location.href)) {
     print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a> |
-      <a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>
-      <p><b>Currently not working like it should</b>. If you let AI touch your code, <b><i>triple</b></i> check it!</p>`);
+      <a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>`);
   }
   const seasons = seasonsEnum();
   const seasonsCode = seasonsEnum.toString();
@@ -136,7 +135,8 @@ function texts() {
     });
     myEnum.append(label: string); &lt;= add a value at enum end
     myEnum.prepend(label: string); &lt;= add a value at enum start
-    myEnum.insert(label: string, position: Number); &lt;= insert a value at enum[position]
+    myEnum.insert(label: string, position: Number); &lt; insert a value at enum[position].
+      Note: [position] is NOT zero indexed, so the ordinal number
     myEnum.remove(label: string);  &lt;= remove [label] from enum
     myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
   */`)
@@ -421,7 +421,8 @@ function seasonsEnum() {
   seasons.append("Winter");
   seasons.remove("Spring");
   seasons.prepend("Spring");
-  seasons.insert("Autumn", 2);
+  seasons.insert("Autumn", 3);
+  //                       ^ note: not zero indexed
   seasons.rename("Sumer", "Summer");
   return seasons;
 }
