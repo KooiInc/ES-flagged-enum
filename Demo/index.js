@@ -33,7 +33,7 @@ function runDemo() {
   if (/github/i.test(location.href)) {
     print(`!!<p><a target="_top" href="https://github.com/KooiInc/ES-flagged-enum">Back to repository</a> |
       <a target="_blank" href="https://stackblitz.com/edit/js-gxqsej?file=index.js">Example code @Stackblitz</a></p>
-      <p><b>Currently not working like it shoult</b> - if you let AI touch your code, <b><i>triple</b></i> check it!`);
+      <p><b>Currently not working like it should</b>. If you let AI touch your code, <b><i>triple</b></i> check it!</p>`);
   }
   const seasons = seasonsEnum();
   const seasonsCode = seasonsEnum.toString();
