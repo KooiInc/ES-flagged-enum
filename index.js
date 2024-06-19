@@ -11,20 +11,33 @@ function enumFactory({keys = [], name = `Anonymous Enum`} = {}) {
  * returns an Object proxied with a get trap doing the
  * actual work
  */
-function createEnumProxy(/*mapped, internals*/keys,  name) {
+function createEnumProxy(keys, enumName) {
   let valueMap = keys.reduce(createMappedValues, []);
   
+  /**
+   * The actual properties/methods to use (by Proxy)
+   * @type { Readonly<{
+   *  rename(*, *): void, readonly keys: *,
+   *  valueOf(): string,
+   *  readonly values: *,
+   *  readonly name: *,
+   *  prepend(*): void,
+   *  insert(*, *): void,
+   *  toString(): string,
+   *  append(*): void,
+   *  remove(*): void}> }
+   */
   const internals = Object.freeze({
     get keys() { return valueMap.map(v => v.label); },
     get values() { return valueMap.map(v => v.value); },
-    get name() { return name; },
-    append(label) { valueMap = addValue2Enum(valueMap, name, label, Object.keys(valueMap).length); },
-    prepend(label) { valueMap = addValue2Enum(valueMap, name, label); },
-    insert(label, at) { valueMap = addValue2Enum(valueMap, name, label, at); },
+    get name() { return enumName; },
+    append(label) { valueMap = addValue2Enum(valueMap, enumName, label, Object.keys(valueMap).length); },
+    prepend(label) { valueMap = addValue2Enum(valueMap, enumName, label); },
+    insert(label, at) { valueMap = addValue2Enum(valueMap, enumName, label, at); },
     remove(label) { valueMap = removeValue(valueMap, label); },
-    rename(oldLabel, newLabel) { valueMap = renameValue(valueMap, name, oldLabel, newLabel); },
-    toString() { return serialize(valueMap, name); },
-    valueOf() { return serialize(valueMap, name); },
+    rename(oldLabel, newLabel) { valueMap = renameValue(valueMap, enumName, oldLabel, newLabel); },
+    toString() { return serialize(valueMap, enumName); },
+    valueOf() { return serialize(valueMap, enumName); },
   });
   
   return new Proxy({}, {
@@ -48,13 +61,13 @@ function createEnumProxy(/*mapped, internals*/keys,  name) {
       }
     },
     set() {
-      throw new TypeError(`Enum [${name}] values can not be set directly`);
+      throw new TypeError(`Enum [${enumName}] values can not be set directly`);
     }
   });
 }
 
 /**
- * Adds a value with [label] for flagged Enum with [name],
+ * Adds a value with [label] for flagged Enum with [enumName],
  * using the mapped values [valueMap], optionally at
  * position [at] within the [valueMap].
  * returns a re-indexed array of Enum values
@@ -166,18 +179,18 @@ function removeNone(keys) {
  * an Array with strings (with length).
  * returns Array<string>(n keys which are string with length > 0)
  */
-function checkInput(keys, name) {
+function checkInput(keys, enumName) {
   if (keys?.constructor === String) {
     keys = [keys];
   }
   
   if (keys?.constructor !== Array) {
-    console.warn(`create enumFactory [${name}]: invalid keys value. Inititalized with empty Array`);
+    console.warn(`create enumFactory [${enumName}]: invalid keys value. Inititalized with empty Array`);
     keys = [];
   }
   
   if (keys.length && keys.find(k => !isStringWithLength(k))) {
-    console.warn(`create enumFactory [${name}]: non string/empty string key values are removed`);
+    console.warn(`create enumFactory [${enumName}]: non string/empty string key values are removed`);
     keys = keys.filter(k => isStringWithLength(k));
   }
   
@@ -222,8 +235,8 @@ function findValueCI(enumValues, key) {
  * the current flagged Enum.
  * returns string
  */
-function serialize(enumValues, name) {
-  const header = `Enum values for Enum [${name}]`;
+function serialize(enumValues, enumName) {
+  const header = `Enum values for Enum [${enumName}]`;
   const separator = Array(header.length + 1).join(`-`);
   const aggregated = enumValues.map(entry => {
     return `${entry.value} => index: ${+entry.value}, flag: ${entry.value.flag}n (0x${entry.value.flag?.toString(2)})`;
