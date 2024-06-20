@@ -40,8 +40,8 @@ function runDemo() {
     `!!Create a flagged Enumeration
       <div class="instrct">This module enables the creation of an empty flagged enumeration (<code>Enum</code>)
       or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.</div>`,
-    `!!<code class="block">${appText.init}
-      ${cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`)).trim()}</code>`,
+    `!!<code class="block">${appText.init}\n\n${
+        cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`)).trim()}</code>`,
     `<code>seasons.toString()</code> => <pre>${seasons}</pre>`,
     `<code>seasons[2]</code> => ${seasons[2]}`);
   
