@@ -135,8 +135,9 @@ function texts() {
     });
     myEnum.append(label: string); &lt;= add a value at enum end
     myEnum.prepend(label: string); &lt;= add a value at enum start
-    myEnum.insert(label: string, position: Number); &lt; insert a value at enum[position].
-      Note: [position] is NOT zero indexed, so the ordinal number
+    myEnum.insert(label: string, position: Number); &lt;= create a value with [label] at enum[position].
+    myEnum.move(label: string, position: Number);  &lt;= move value[label] to enum[position]
+    // =>  Note for insert/move: [position] is NOT zero indexed, so the ordinal number
     myEnum.remove(label: string);  &lt;= remove [label] from enum
     myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
   */`)
@@ -421,8 +422,10 @@ function seasonsEnum() {
   seasons.append("Winter");
   seasons.remove("Spring");
   seasons.prepend("Spring");
-  seasons.insert("Autumn", 3);
+  seasons.insert("Autumn", 2);
   //                       ^ note: not zero indexed
   seasons.rename("Sumer", "Summer");
+  seasons.move("Autumn", 3);
+  //                       ^ note: not zero indexed
   return seasons;
 }

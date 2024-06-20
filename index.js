@@ -36,6 +36,7 @@ function createEnumProxy(keys, enumName) {
     insert(label, at) { valueMap = addValue2Enum(valueMap, enumName, label, at); },
     remove(label) { valueMap = removeValue(valueMap, label); },
     rename(oldLabel, newLabel) { valueMap = renameValue(valueMap, enumName, oldLabel, newLabel); },
+    move(label, position) { valueMap = moveTo(valueMap, enumName, label, position); },
     toString() { return serialize(valueMap, enumName); },
     valueOf() { return serialize(valueMap, enumName); },
   });
@@ -92,6 +93,20 @@ function addValue2Enum(valueMap, enumName, label, at = 1) {
 }
 
 /**
+ * moves entry with [label] to [position] in the enum with [name]
+ */
+function moveTo(valueMap, enumName, label, position) {
+  label = isStringWithLength(label) && String(label)?.trim() || undefined;
+  const exists = label && valueMap.find(v => v.label === label);
+  
+  if (exists && !isNaN(+position) && position <= valueMap.length ) {
+    valueMap = addValue2Enum(valueMap.filter(v => v.label !== label), enumName, label, position);
+  }
+  
+  return reIndex(valueMap);
+}
+
+/**
  * Callback for the creation of an Array of values
  * from an Array of key values (strings)
  * returns the input Array [acc], with a new
@@ -142,7 +157,7 @@ function removeValue(valueMap, label = ``) {
  * returns true/false
  */
 function isStringWithLength(maybeString) {
-  return maybeString?.constructor === String && maybeString.trim().length;
+  return maybeString?.constructor === String && maybeString.trim().length > 0;
 }
 
 /**
