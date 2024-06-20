@@ -133,13 +133,14 @@ function texts() {
       [keys: String|Array&lt;string&gt;],
       [name: String] <= default "Anonymous Enum"
     });
-    myEnum.append(label: string); &lt;= add a value at enum end
-    myEnum.prepend(label: string); &lt;= add a value at enum start
-    myEnum.insert(label: string, position: Number); &lt;= create a value with [label] at enum[position].
-    myEnum.move(label: string, position: Number);  &lt;= move value[label] to enum[position]
+    // myEnum methods
+    .append(label: string); &lt;= add a value at enum end
+    .prepend(label: string); &lt;= add a value at enum start
+    .insert(label: string, position: Number); &lt;= create a value with [label] at enum[position]
+    .move(label: string, position: Number);  &lt;= move value[label] to enum[position]
     // =>  Note for insert/move: [position] is NOT zero indexed, so the ordinal number
-    myEnum.remove(label: string);  &lt;= remove [label] from enum
-    myEnum.rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
+    .remove(label: string);  &lt;= remove [label] from enum
+    .rename(label: string, newLabel: string);  &lt;= rename [label] to [newLabel]
   */`)
   const initializeDOWS = cleanup(`
   // create an enum for british weekday names (used in the examples)
