@@ -426,6 +426,6 @@ function seasonsEnum() {
   //                       ^ note: not zero indexed
   seasons.rename("Sumer", "Summer");
   seasons.move("Autumn", 3);
-  //                       ^ note: not zero indexed
+  //                     ^ note: not zero indexed
   return seasons;
 }
