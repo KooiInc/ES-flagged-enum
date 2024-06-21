@@ -43,7 +43,7 @@ function runDemo() {
     `!!<code class="block">${appText.init}\n\n${
         cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`)).trim()}</code>`,
     `<code>seasons.toString()</code> => <pre>${seasons}</pre>`,
-    `<code>seasons[2]</code> => ${seasons[2]}`);
+    `<code>String(seasons[2])</code> => ${String(seasons[2])}`);
   
   print(`!!British weekday names example
       <div class="instrct">In the following an <code>Enum</code> of weekdays is worked
