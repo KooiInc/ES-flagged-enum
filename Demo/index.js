@@ -1,5 +1,5 @@
 import {default as createEnum, extendBigInt } from "../index.js";
-import { $, logFactory } from  "./sbhelpers.bundled.js";
+import { $, logFactory } from  "./htmlhelpers.min.js";
 const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = texts();
@@ -40,7 +40,7 @@ function runDemo() {
     `!!Create a flagged Enumeration
       <div class="instrct">This module enables the creation of an empty flagged enumeration (<code>Enum</code>)
       or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.</div>`,
-    `!!<code class="block">${appText.init}\n\n${
+    `!!<code class="block">${appText.init.trim()}\n\n${
         cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`)).trim()}</code>`,
     `<code>seasons.toString()</code> => <pre>${seasons}</pre>`,
     `<code>String(seasons[2])</code> => ${String(seasons[2])}`);
@@ -48,19 +48,19 @@ function runDemo() {
   print(`!!British weekday names example
       <div class="instrct">In the following an <code>Enum</code> of weekdays is worked
       out, with code examples and more explanation in comment within the code blocks.</div>
-      <code class="block">${appText.initializeDOWS}</code>`);
+      <code class="block">${appText.initializeDOWS.trim()}</code>`);
   
   print(`<code>\`\${dows}\` <span class="comment">// invokes toString</span></code> =><pre>${dows}</pre>`);
   
   print(`!!Extracting flags to constants`,
-    `!!<code class="block">${appText.extractFlags}</code>`);
+    `!!<code class="block">${appText.extractFlags.trim()}</code>`);
   
   print(`!!Extracting enum values to constants`,
-    `!!<code class="block">${appText.extractValues}</code>`);
+    `!!<code class="block">${appText.extractValues.trim()}</code>`);
   
   print(`!!String, value,  flag`,
     `${appText.strValFlag}
-    <code class="block">${appText.sumUp}</code></div>
+    <code class="block">${appText.sumUp.trim()}</code></div>
     => ${dows.thurSDay} (index: ${+dows.ThursDay}, flag: ${dows.$thursday})`);
   
   print(`<div class="instrct">Every Enum value knows a <code>.flag</code>
@@ -225,14 +225,14 @@ function createCodeBlocks() {
   document.querySelectorAll(`code.block`)
     .forEach(block => {
       block = $(block);
+      const li = block.closest('li');
       block.removeClass(`block`);
-      block.addClass(`language-javascript`, `line-numbers`);
-      block.closest(`div`)
-        .append($(`<pre class="line-numbers language-javascript"></pre>`)
-          .append(block));
+      //block.addClass(`language-javascript`);
+      const codeDiv = $.div($.pre({class: "language-javascript"}).append(block));
+      li.append(codeDiv);
     });
-  
-  Prism.highlightAll();
+  hljs.highlightAll();
+  //Prism.highlightAll();
 }
 
 function localeDowNames(locale) {
@@ -287,9 +287,13 @@ function initializeAndRunDemo() {
       color: #555;
       font-weight: normal;
     }`,
-    `#log2screen code.language-javascript {
-      background-color: revert;
-      color: revert;
+    `#log2screen pre.language-javascript {
+      border-radius: 8px;
+      box-shadow: 2px 2px 6px #000;
+    }`,
+    `#log2screen .language-javascript {
+      background-color: #474949;
+      padding: 0.5em;
     }`,
   );
   
@@ -362,7 +366,7 @@ function checkboxesDemo(dows) {
   $.delegate("click", "input[type='checkbox']", handle);
   
   // checkboxes click handler
-  function handle(evt) {
+  function handle({evt}) {
     if (evt.target.dataset.subset) { return selectSubset(evt); }
     return setSelectedValues();
   }
