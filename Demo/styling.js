@@ -4,11 +4,10 @@ function styleIt($) {
   $.editCssRules(
     `body {
       font: normal 14px/20px verdana, arial;
-      margin: 2rem;
     }`,
     `.container {
       position: absolute;
-      padding-bottom: 2rem;
+      padding: 2rem 0;
       inset: 0;
     }`,
     `#log2screen .head div.regular {

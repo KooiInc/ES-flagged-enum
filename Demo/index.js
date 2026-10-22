@@ -2,6 +2,7 @@ import {default as createEnum, extendBigInt } from "../index.js";
 import { $, logFactory } from  "./htmlhelpers.min.js";
 import stylePage from "./styling.js";
 import appTextFactory from "./appText.js";
+$.allowAttributes(`target`);
 const { log: print } = logFactory();
 const cleanup = str => str.replace(/\n {2}/gm, `\n`);
 const appText = appTextFactory(cleanup);
@@ -41,8 +42,10 @@ function runDemo() {
   const seasonsCode = seasonsEnum.toString();
   print(
     `!!Create a flagged Enumeration
-      <div class="instrct">This module enables the creation of an empty flagged enumeration (<code>Enum</code>)
-      or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.</div>`,
+      <div class="instrct">This module enables the creation of an empty
+      <a target="_blank" href="https://timdeschryver.dev/blog/flagged-enum-what-why-and-how">flagged enumeration</a>
+       (<code>Enum</code>) or idem from an array of strings. You can prepend/append/insert/remove/rename keys in/to it.
+       </div>`,
     `!!<code class="block">${appText.init.trim()}\n\n${
         cleanup(seasonsCode.slice(seasonsCode.indexOf(`{`) + 1, -2).split(`\n`).slice(0, -1).join(`\n`)).trim()}</code>`,
     `<code>seasons.toString()</code> => <pre>${seasons}</pre>`,
