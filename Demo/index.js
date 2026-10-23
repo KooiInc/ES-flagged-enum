@@ -2,16 +2,9 @@ import {default as createEnum, extendBigInt } from "../index.js";
 import { $, logFactory } from  "./htmlhelpers.min.js";
 import stylePage from "./styling.js";
 import appTextFactory from "./appText.js";
-$.allowAttributes(`target`);
-const { log: print } = logFactory();
-const cleanup = str => str.replace(/\n {2}/gm, `\n`);
-const appText = appTextFactory(cleanup);
 
-window.factory = createEnum;
-const [In, bin8] = extendBigInt();
-
-const isSB = /stackblitz/i.test(location.href);
-initializeAndRunDemo();
+const {print, cleanup, appText, In, bin8, isSB} = initializeAndRunDemo();
+runDemo();
 
 function runDemo() {
   if (!isSB) { console.clear(); }
@@ -150,8 +143,16 @@ function localeDowNames(locale) {
 }
 
 function initializeAndRunDemo() {
+  const { log: print } = logFactory();
+  const cleanup = str => str.replace(/\n {2}/gm, `\n`);
+  const appText = appTextFactory(cleanup);
+  window.factory = createEnum;
+  const [In, bin8] = extendBigInt();
+  const isSB = /stackblitz/i.test(location.href);
+  $.allowAttributes(`target`);
   stylePage($);
   $(`head`).append(`<link rel="icon" href="./githubicon.png" type="image/png">`);
+  return {print, cleanup, appText, In, bin8, isSB};
   runDemo();
 }
 
