@@ -128,12 +128,10 @@ function createCodeBlocks() {
       block = $(block);
       const li = block.closest('li');
       block.removeClass(`block`);
-      //block.addClass(`language-javascript`);
       const codeDiv = $.div($.pre({class: "language-javascript"}).append(block));
       li.append(codeDiv);
     });
   hljs.highlightAll();
-  //Prism.highlightAll();
 }
 
 function localeDowNames(locale) {
